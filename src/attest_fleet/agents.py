@@ -1,11 +1,18 @@
-"""The fleet's agents, built with Google ADK on Gemini 3.5.
+"""The fleet's agents, built with Google ADK and run through OpenRouter via LiteLLM.
 
-Identity list (also served at /fleet/identities):
+Identity list (also served at /fleet/identities); the concrete model for each role is set
+in config.py, so it is referenced by role here rather than hard-coded:
 
-  fleet_controller  gemini-3.7-flash       decomposes a ticket into typed tasks; read-only tools
-  billing_agent     gemini-3.7-flash  refunds and order questions; mutating tools behind policy
-  account_agent     gemini-3.7-flash  address, subscription, lock and deletion; same policy
-  auditor           gemma-4-31b-it         verifies tasks with no deterministic post-condition
+  fleet_controller  (controller model)  decomposes a ticket into typed tasks; read-only tools
+  billing_agent     (worker model)      refunds and order questions; mutating tools behind policy
+  account_agent     (worker model)      address, subscription, lock and deletion; same policy
+  vision_reader     (vision model)      reads an image attached to a ticket into text
+  auditor           (auditor model)     verifies tasks with no deterministic post-condition
+
+Each role runs on LiteLlm(model="openrouter/<provider>/<model>"). The auditor is a different
+model family from the workers, so its verification stays independent of what it checks. Agents
+built with output_schema run in ADK "task" mode: ADK injects a finish_task tool so a worker can
+call its real tools and then return a typed Plan / Claim.
 
 Workers never talk to each other and never see the whole ticket history: the
 controller passes exactly the context each task needs. That decoupling is what
