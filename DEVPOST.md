@@ -1,129 +1,181 @@
-# Attest Fleet
+# Refundly
 
-**Tagline:** An agent fleet that measures its own silent failures, and publishes the number.
+**Tagline:** An AI agent that refunds your money through PayPal — and never says "done" until PayPal's own ledger agrees.
 
 ---
 
 ## Inspiration
 
-An agent reports "refund issued." The payment gateway left it pending. The run counts as a
-success, the board stays green, and the customer never gets their money.
+Rekha, 58, was double-charged by a gym app she couldn't find the cancel button for. She called,
+sat through twenty minutes of hold music, and gave up. Most people give up. The money is small
+enough to walk away from and the process is exhausting enough that walking away is the rational
+choice. Multiply that by everyone who has ever been quietly overcharged, or trapped in a
+subscription built to be un-cancellable, and it is a lot of money that simply stays taken.
 
-Nobody sees that. Not the agent, not the dashboard, not the person on call at 2am. The agent
-isn't lying either. It read a tool response that said success and believed it. It genuinely
-can't tell.
+An AI agent can do this chore. It can read the complaint, find the charge, and issue the refund.
+The thing that kept me up was the failure mode nobody puts on a slide: the agent does the chore
+*badly and reports that it did it well.* The refund tool returns `success`, the money never
+actually leaves, the agent says "refund issued," its scoreboard stays green, and Rekha still
+never gets her money back. The agent is not lying. It read a response that said success and
+believed it. It genuinely cannot tell.
 
-I kept looking for the number. How often does an enterprise agent fleet say "done" about
-something that didn't happen? Every framework I checked computes its success rate from the
-agent's own self-report, which means when the agent is wrong about itself, the dashboard is
-wrong with it. So I built the thing that measures it.
+I had been looking into exactly this — silent failure in automated systems, the gap between what
+a model reports and what actually happened. The research is blunt about the size of it: false
+success is up to **48%** of all failures in single-control agent tasks, and the observability
+tools that grade an agent with another model as a judge catch it at only about **0.65 AUROC**,
+barely better than a coin flip, because a confident wrong claim reads as success to a model too.
+Refundly is that research pointed at the one place it hurts a person directly: their money.
 
 ## What it does
 
-Attest Fleet runs five governed agents on a customer support workload: a controller that
-splits a ticket into typed tasks, a billing agent, an account agent, a vision reader for
-attachments, and a Gemma auditor. Every worker sees only its own task, never the whole
-ticket. That isolation is the point. It's what makes each claim checkable on its own.
+You describe the problem in plain language — "refund my last charge," "cancel this subscription,
+I've been trying for a week." A small governed fleet handles it:
 
-Then every claim gets checked against Firestore, the actual system of record. Deterministic
-post-conditions first, the LLM auditor only where no post-condition exists. If the agent
-said "done" and the record disagrees, that's a silent failure, and it gets counted.
+- a **controller** reads the whole request, splits it into typed tasks, and resolves which
+  customer you are. It has read-only tools, so the component with the most context has the least
+  authority — it cannot move a cent.
+- a **billing agent** issues refunds and nothing else. an **account agent** cancels
+  subscriptions, changes addresses, locks, unlocks and deletes — and cannot issue a refund.
+  The write scopes are disjoint by construction, so a prompt-injected billing agent has no
+  cancellation tool to be talked into using.
+- a **policy gate** runs before every money action. Refunds over a set limit pause for a human,
+  the limit is cumulative per order so five refunds of 98 can't walk through a 100 ceiling, a
+  kill switch blocks every write fleet-wide, and irreversible actions always escalate regardless
+  of how confident the model is.
 
-Across 40 tickets with a 30% injected fault rate:
+Then comes the part the project exists for. After the agent acts, a **verifier re-reads PayPal's
+own record** — not the tool's return value, not a local copy — and checks the post-condition the
+task implies. A refund is only `verified` when PayPal reports the refund `COMPLETED`; a
+cancellation only when PayPal reports the subscription `CANCELLED`. A refund the tool marked
+"completed" that PayPal still shows `PENDING` is the silent failure, and it gets caught and
+counted instead of shipped. The gap between what the fleet *reported* and what PayPal *confirms*
+is published as a rate, next to a hash-linked evidence trail for every request.
 
-- reported success 53.5%, verified success 51.2%
-- silent-failure rate 4.3%, which is 1 of 23 done-claims, 95% CI 0.008 to 0.210
-- false alarms 0%
-- Brier 0.0214, ECE 0.0307
+**"Done" means PayPal agrees.** That is the whole product in four words.
 
-That interval is wide because it's one event. I'd rather publish the interval than a clean
-number that reads more certain than it is.
+## Real PayPal, real verification
 
-The rest is the governance a fleet like this needs to be allowed near real money. A policy
-gate stops an over-limit refund before it runs and routes it to a human, and the limit is
-cumulative per order so five refunds of 98 can't walk through a 100 limit. Model Armor
-screens ticket text before any agent reads a word. Agent cards are published to Google's
-Agent Registry and read back live, each carrying a contract derived from its real tool
-bindings, so widening an agent's authority fails the build. The evidence trail is
-hash-chained, tamper-evident rather than tamper-proof, and the README says exactly why the
-difference matters.
+The agent acts *through the same PayPal client the verifier reads back through*
+(`src/attest_fleet/paypal.py`): `refund_capture` and `cancel_subscription` for the actions,
+`get_refund`, `get_capture` and `get_subscription` for the independent reads. Using one channel
+to act and a second, independent query to confirm is the entire trust argument — the confirmation
+does not come from the thing being confirmed. The client is pure-stdlib `urllib`, so verification
+adds no dependency, and it talks to the PayPal sandbox over the standard Orders, Payments and
+Billing Subscriptions REST APIs.
 
-There's also a second check that I haven't seen elsewhere. Post-conditions tell you the end
-state is right. They don't tell you it was reached legitimately. So the route gets checked
-too: did the worker read the record back after writing, did every write name the customer
-the ticket named. That's reported separately from the verdict, because an end-state pass
-with a process failure isn't a silent failure, and calling it one would be its own kind of
-wrong.
+This is deliberately the layer that neither a payment gateway nor an agent toolkit gives you.
+PayPal's own Agent Toolkit already lets an agent *issue* a refund; what nothing in that stack
+does is turn around afterward and prove, against the ledger, that the refund really moved. That
+proof is Refundly's original contribution.
 
-## How I built it
+## Design
 
-Google ADK 2.7 for the agents. Gemini 3.7 Flash on Vertex AI for the controller and
-workers, Gemma 4 for the auditor, Cloud Run for the service, Firestore as the system of
-record, Model Armor on the input boundary, Agent Registry for identity, OpenTelemetry into
-Cloud Trace.
+A board whose entire argument is "a green light is not evidence" should not itself be a wall of
+green. So the console leads with the one number that matters — the **silent-failure rate** — not
+a dashboard of reassuring checkmarks. I rebuilt the interface around progressive disclosure: the
+Overview tab carries the whole summary, every other tab shows only its own content, and the full
+evidence for a request lives in a modal you open on demand rather than a permanent wall of detail.
+The palette is restrained to near-monochrome with one blue and a single reserved red for the
+silent-failure signal; status is encoded with glyphs as well as colour, so the board is readable
+to a colour-blind operator and meets WCAG-AA contrast. It is meant to be scanned under pressure,
+not admired.
 
-The model routing ended up hybrid, and not by choice. Gemini goes to Vertex, and `global`
-is the only location serving 3.7 right now. Gemma isn't a Vertex publisher model, so the
-auditor keeps the Developer API key. Text-to-speech went the same way, because Vertex
-rejects the AUDIO response modality outright. Two clients, one fleet.
+## Safe failure — the refusal is the feature
 
-The evaluation harness is the part I care about. 40 tickets, faults injected at a known
-rate, hidden ground truth on the ones that carry it, and metrics computed over a single
-consistent denominator so the reported-versus-verified gap is like for like.
+In the demo, a customer asks for a $490 annual-plan refund. It does not go through. The gate holds
+it before it runs, writes an approval request, and the agent reports `blocked` — never `done`.
+That is the behaviour I most want a judge to see first, ahead of any happy path: an agent that is
+*allowed* to move real money has to be an agent that stops itself when it should. The same demo
+carries a caught silent failure — an address change the tool "saved" to a draft field that the
+rest of the system never reads — so you can watch the verifier disagree with a confident `done`
+and record it.
+
+## What's real, and what's simulated
+
+The project is about not overstating outcomes, so the submission will not either.
+
+**Real, implemented and committed:** the PayPal sandbox client, the refund/cancel tool wiring,
+and the verifier's independent read-back. With sandbox keys set, a refund is marked complete only
+if PayPal returns `COMPLETED`. Every model role runs on OpenRouter, and the credential-free test
+suite (59 tests, no network) covers the verifier, the policy gate and the metrics.
+
+**Simulated or not yet run live:** the bundled demo data and the static site are fabricated so the
+interface is explorable with no backend. The metric figures shown in the console's example mode
+and committed under `evidence/` are **historical**, from an earlier model sweep of the
+predecessor project, and are labelled as such — a live OpenRouter + PayPal-sandbox sweep has not
+been run yet, and those numbers are not Refundly's measured rate. One honest gap remains before a
+full end-to-end live refund: the demo orders need real sandbox captures to act on, and wiring that
+seeding into startup is the next step. The client, tool and verifier paths themselves are done.
+
+## A significant update during the hackathon
+
+Refundly is forked from an earlier agent-reliability project of mine, built for a different, now
+closed competition. The rules allow an existing project only if it is significantly reworked
+during the submission window, and ask that the rework be explained, so here it is exactly.
+
+**Kept:** the governed-fleet spine — a read-only controller, workers with disjoint tool scopes, a
+deterministic policy gate, and the idea of verifying post-conditions against a system of record
+rather than trusting a self-report.
+
+**Rebuilt in the window:** (1) **real PayPal money movement, verified against PayPal** — the
+verifier was re-pointed from a mock in-memory store to PayPal's live ledger, which is what turns
+"done means the record agrees" from a tautology into a real claim against a real third party; (2)
+the **entire AI backend swapped** from Google Vertex / Gemini to OpenRouter via LiteLLM across the
+controller, both workers, the vision intake and the auditor, with the auditor kept on a different
+model family (Claude 3.5 Haiku) so independent verification stays independent in model as well as
+in method; (3) a new **consumer** problem and product — Rekha, not an SRE; (4) a full **UI
+overhaul**. The predecessor's Google-Cloud features remain in the code but self-disable without a
+project and are not part of this entry's claims.
 
 ## Challenges I ran into
 
-The calibration was wrong and it took me too long to see it. I was scoring the agent's
-stated confidence as if it were P(verified = true). It isn't. It's the agent's confidence in
-its own claim, so when a worker says "blocked" at 0.9 it is confidently claiming failure.
-Fixing that one line moved Brier from 0.3806 to 0.1806. The bug made my agents look badly
-calibrated when the harness was the thing that was broken.
+The one that still bothers me came from the predecessor and shaped this whole project: a retry
+once **double-spent a refund.** The first attempt paid out, the run retried, the second attempt
+paid out again, and both verified clean because the end state looked right each time. That is the
+exact failure Refundly exists to catch, produced by my own system. The fix is an idempotency
+guard that fingerprints a mutating call and replays the recorded result instead of running it
+twice, plus the cumulative per-order limit.
 
-A retry double-spent a refund. 40 went out, the run retried, another 40 went out, and both
-verified clean because the end state looked right each time. I added an idempotency guard
-and a cumulative threshold. That one bothered me, because it's exactly the failure the
-project exists to catch and my own system produced it.
+Swapping the model backend was more than a config change. The old auditor's independence came
+partly from running on a different Google backend; moving everything to OpenRouter meant I had to
+re-establish that independence deliberately, by keeping the auditor on a non-Gemini family
+(Claude) rather than letting it collapse onto the same model as the workers. I also had to rewrite
+the image-intake path onto OpenRouter vision and prove the fleet still boots and passes tests with
+no Google credentials anywhere.
 
-The interpretability probe I'd built didn't survive review. It looked like a strong result,
-a linear probe recovering the label from activations at 1.00 AUROC while surface text sat at
-chance. Then I read my own generator and found it drew confidence from the same distribution
-for both labels. The controls were uninformative by construction. The contrast I was proud of
-was an artifact of how I made the data. I retracted it in the README, the results file, and
-the dashboard, and moved it to a roadmap section where it belongs.
-
-Smaller ones: Firestore's 1 MiB document limit versus inline audio, an admin token that made
-it into a public repo and had to be rotated, and the default compute service account holding
-`roles/editor` on a shared project, which is now a dedicated one.
+And a measurement bug I keep as a cautionary tale: I had been scoring the agent's stated
+confidence as if it were the probability the outcome was verified. It isn't — it's the agent's
+confidence in *its own claim*, so a worker that says `blocked` at 0.9 is confidently claiming
+failure, not success. Fixing that one line changed the calibration numbers materially, and it was
+humbling to find it in a project whose entire thesis is "don't trust a number without checking
+where it came from."
 
 ## Accomplishments I'm proud of
 
-The number exists and it's checkable. `/metrics` is live, computed from real runs, and every
-figure in the README, the architecture diagram and the demo comes from it. If a judge
-disagrees with my arithmetic they can hit the endpoint.
-
-I also measure the checker. On those 40 runs the verifier disagreed with hidden ground truth
-twice, both on a ticket where two customers share a name. The write landed, the post-condition
-passed, and nothing confirmed it was the right person. A verification layer that hides its own
-error rate is asking for exactly the trust it tells you not to give an agent, so that goes in
-the README too.
+The verification is deterministic and auditable: it reads PayPal and compares, with no model in
+the verdict, so a judge who doubts a result can re-read the ledger themselves. The refusal path
+works, and I lead with it. The honesty section above exists because a verification layer that
+hides its own limits is asking for the very trust it tells you not to give an agent — so I also
+measure the checker, and the known blind spot (two customers sharing a name, where an address
+write lands and the post-condition passes without confirming it was the right person) is written
+down rather than papered over.
 
 ## What I learned
 
-Never trust a declared shape. Read it from the file. Half the bugs above came from believing
-a number that looked right instead of checking where it came from, and I did that in a project
-whose entire argument is that you shouldn't.
-
-The other thing: a retraction is cheaper than a defense. Pulling the probe result cost me a
-good-looking chart. Keeping it would have cost the credibility of everything next to it.
+Never trust a declared shape — read it from the record. And a retraction is cheaper than a
+defense: the credibility of the numbers you keep depends on being willing to drop the ones that
+don't hold up.
 
 ## What's next
 
-Per-agent calibration instead of fleet-wide, so a badly calibrated worker can't hide behind
-the average. More verifier coverage on the ambiguous-entity case that produced both blind
-spots. And running the sweep at a few thousand tickets, because a rate over 23 claims has an
-interval wide enough to drive a truck through, and I'd like to narrow it.
+Wire the sandbox-seeding step into startup so a live refund is one command, then run and publish a
+real OpenRouter + PayPal-sandbox sweep to replace the historical numbers with Refundly's own.
+After that: per-agent identity, so each worker acts under its own credential rather than the
+process's, and a process-conformance check alongside end-state verification, so a right outcome
+reached the wrong way is caught too.
 
 ## Built with
 
-Google ADK 2.7, Gemini 3.7 Flash, Gemma 4, Vertex AI, Google Agent Registry (A2A), Model
-Armor, Cloud Run, Firestore, OpenTelemetry, Cloud Trace, Python, FastAPI.
+OpenRouter, LiteLLM, Google Agent Development Kit (ADK), Claude 3.5 Haiku (independent auditor),
+Gemini 2.5 Flash, PayPal REST APIs — Orders, Payments/Refunds, Billing Subscriptions (sandbox),
+Python, FastAPI, uv.
