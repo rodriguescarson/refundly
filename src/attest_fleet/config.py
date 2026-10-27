@@ -16,7 +16,7 @@ APP_NAME = "attest_fleet"
 # The auditor is a DIFFERENT model family from the workers, so verification stays independent.
 CONTROLLER_MODEL = os.getenv("ATTEST_CONTROLLER_MODEL", "openrouter/google/gemini-2.5-flash")
 WORKER_MODEL = os.getenv("ATTEST_WORKER_MODEL", "openrouter/google/gemini-2.5-flash")
-AUDITOR_MODEL = os.getenv("ATTEST_AUDITOR_MODEL", "openrouter/anthropic/claude-3.5-haiku")  # independent family
+AUDITOR_MODEL = os.getenv("ATTEST_AUDITOR_MODEL", "openrouter/anthropic/claude-haiku-4.5")  # independent family
 VISION_MODEL = os.getenv("ATTEST_VISION_MODEL", "openrouter/google/gemini-2.5-flash")
 VOICE_MODEL = os.getenv("ATTEST_VOICE_MODEL", "openrouter/google/gemini-2.5-flash")
 # OpenRouter does not serve TTS, so the spoken briefing needs a separate provider (or stays
@@ -73,7 +73,7 @@ def client_kwargs_for(model: str) -> dict:
 
 
 # On a transient error the fleet degrades to a cheaper rung rather than failing a case.
-_FLOOR = os.getenv("ATTEST_FLOOR_MODEL", "openrouter/google/gemini-2.0-flash-001")
+_FLOOR = os.getenv("ATTEST_FLOOR_MODEL", "openrouter/google/gemini-2.5-flash-lite")
 
 CONTROLLER_CHAIN = _chain(CONTROLLER_MODEL, _FLOOR)
 WORKER_CHAIN = _chain(WORKER_MODEL, _FLOOR)

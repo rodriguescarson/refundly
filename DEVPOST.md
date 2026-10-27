@@ -122,7 +122,7 @@ verifier was re-pointed from a mock in-memory store to PayPal's live ledger, whi
 "done means the record agrees" from a tautology into a real claim against a real third party; (2)
 the **entire AI backend swapped** from Google Vertex / Gemini to OpenRouter via LiteLLM across the
 controller, both workers, the vision intake and the auditor, with the auditor kept on a different
-model family (Claude 3.5 Haiku) so independent verification stays independent in model as well as
+model family (Claude Haiku 4.5) so independent verification stays independent in model as well as
 in method; (3) a new **consumer** problem and product — Rekha, not an SRE; (4) a full **UI
 overhaul**. The predecessor's Google-Cloud features remain in the code but self-disable without a
 project and are not part of this entry's claims.
@@ -176,6 +176,6 @@ verification, so a right outcome reached the wrong way is caught too.
 
 ## Built with
 
-OpenRouter, LiteLLM, Google Agent Development Kit (ADK), Claude 3.5 Haiku (independent auditor),
+OpenRouter, LiteLLM, Google Agent Development Kit (ADK), Claude Haiku 4.5 (independent auditor),
 Gemini 2.5 Flash, PayPal REST APIs — Orders, Payments/Refunds, Billing Subscriptions (sandbox),
 Python, FastAPI, uv.

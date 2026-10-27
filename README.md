@@ -242,8 +242,8 @@ tests/                  credential-free tests: verifier, policy, metrics, demo g
 | Role | Model (default, override via env) |
 |---|---|
 | Controller, workers, vision | `openrouter/google/gemini-2.5-flash` |
-| Auditor (independent family) | `openrouter/anthropic/claude-3.5-haiku` |
-| Transient-error fallback | `openrouter/google/gemini-2.0-flash-001` |
+| Auditor (independent family) | `openrouter/anthropic/claude-haiku-4.5` |
+| Transient-error fallback | `openrouter/google/gemini-2.5-flash-lite` |
 
 Every id is overridable (`ATTEST_CONTROLLER_MODEL`, `ATTEST_WORKER_MODEL`,
 `ATTEST_AUDITOR_MODEL`, `ATTEST_VISION_MODEL`). PayPal sandbox endpoints used:
