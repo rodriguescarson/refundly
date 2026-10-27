@@ -129,16 +129,21 @@ The project's whole thesis is about not overstating outcomes, so this README pra
   controller planned the ticket and resolved the customer by email, the billing agent called
   `issue_refund`, and the verifier **independently re-read PayPal** and confirmed the refund
   `COMPLETED` (sandbox refund `5S903169LT367394P`). Model → refund → ledger read-back is proven,
-  not just wired.
+  not just wired;
+- the **measured numbers are Refundly's own**: a 40-ticket evaluation sweep on the OpenRouter
+  models ([`scripts/simulate.py`](scripts/simulate.py), fault-rate 0.3) reports a **15.8%
+  silent-failure rate** — reported success 50.0% vs verified 44.7%, every false "done" caught by
+  the verifier ([`evidence/summary.json`](evidence/summary.json)). The static console under `site/`
+  is built from this sweep.
 
 **Simulated or not yet run live — stated plainly:**
 
-- the bundled demo (`ATTEST_DEMO=1`) and the static site are **fabricated sample data**, there
-  so the interface is explorable with no backend;
-- the metric numbers in `evidence/` and in the console's example mode are **historical**, from
-  the earlier project's model sweep; a full **multi-run** OpenRouter + PayPal-sandbox sweep has
-  **not been run yet**, so those numbers are not Refundly's own measured rate (one live refund is
-  proven above — a rate needs many);
+- the bundled demo (`ATTEST_DEMO=1`) is **fabricated sample data**, there so the interface is
+  explorable with no backend — but the static console under `site/` is **not**: it is the real
+  sweep above;
+- the sweep's silent failures are **induced with a fault injector** (`ATTEST_FAULT_RATE`), because
+  a real gateway does not fail on command; measuring a *detection* rate needs induced faults, and
+  the single live PayPal refund above is the real-path proof;
 - when PayPal keys are absent (or an order has no capture), the refund/cancel tools fall back
   to an **in-memory mock** so the app still runs for tests and the demo. The mock preserves a
   fault injector that can simulate a silent failure on demand.
@@ -220,8 +225,9 @@ the agent's self-report — plus the metrics module and the dashboard shell.
 
 **Disclosed honestly:** the earlier project's Google-Cloud features (Model Armor at ingress,
 Agent Registry cards, Cloud Trace export) remain in the codebase but **self-disable** without a
-GCP project and are **not** part of this entry's claims. The committed metric numbers are from
-the earlier sweep and are labelled as historical, not as Refundly's live measurement.
+GCP project and are **not** part of this entry's claims. The committed metric numbers are now
+Refundly's own, from a 40-ticket OpenRouter evaluation sweep (`evidence/summary.json`), replacing
+the predecessor's.
 
 ## Architecture — where things live
 
@@ -263,7 +269,8 @@ cancel + read-back (`/v1/billing/subscriptions/{id}/cancel`, `/v1/billing/subscr
 
 ## Roadmap — stated rather than hidden
 
-- Run and publish a live OpenRouter + PayPal-sandbox metric sweep to replace the historical numbers.
+- Extend the evaluation sweep so every ticket runs against a live sandbox capture end to end (the
+  measured rate currently uses fault injection; a single live refund is already proven end to end).
 - Per-agent identity (each worker under its own credential), and process-conformance checks in
   addition to end-state verification.
 

@@ -100,14 +100,16 @@ if PayPal returns `COMPLETED`. Every model role runs on OpenRouter, and the cred
 suite (59 tests, no network) covers the verifier, the policy gate and the metrics. And this has now
 been **run live, end to end, on the PayPal sandbox**: the OpenRouter controller planned the ticket
 and resolved the right customer by email, the billing agent issued the refund, and the verifier
-independently re-read PayPal and confirmed it `COMPLETED` (sandbox refund `5S903169LT367394P`).
+independently re-read PayPal and confirmed it `COMPLETED` (sandbox refund `5S903169LT367394P`). And
+the published numbers are Refundly's own: a 40-ticket OpenRouter evaluation sweep (fault-rate 0.3)
+measures a **15.8% silent-failure rate** — reported success 50.0% vs verified 44.7%, every false
+"done" caught by the verifier — and the static demo console is built from that sweep.
 
-**Simulated or not yet run live:** the bundled demo data and the static site are fabricated so the
-interface is explorable with no backend. The metric figures shown in the console's example mode
-and committed under `evidence/` are **historical**, from an earlier model sweep of the
-predecessor project, and are labelled as such — a full **multi-run** OpenRouter + PayPal-sandbox
-sweep has not been run yet, so those numbers are not Refundly's own measured rate (one live refund
-is proven above; a rate needs many). Minting the demo orders' captures automatically at startup
+**Simulated or not yet run live:** the bundled `ATTEST_DEMO` data is fabricated so the interface is
+explorable with no backend (the static demo console is **not** — it is the real sweep above). The
+sweep's silent failures are **induced with a fault injector**, because a real gateway does not fail
+on command; measuring a detection rate needs induced faults, and the single live PayPal-sandbox
+refund above is the real-path proof. Minting the demo orders' captures automatically at startup
 needs Advanced (direct-card) Checkout on the sandbox business account; where that isn't available,
 a capture is minted once via the sandbox buyer-approval flow instead — which is how the live run
 above was done.
@@ -173,10 +175,11 @@ don't hold up.
 
 ## What's next
 
-A single live agent-driven refund has now been run and verified against PayPal's sandbox ledger;
-next is to run and publish a full OpenRouter + PayPal-sandbox **sweep** to replace the historical
-numbers with Refundly's own measured rate. After that: per-agent identity, so each worker acts
-under its own credential rather than the process's, and a process-conformance check alongside
+A single live agent-driven refund has been verified against PayPal's sandbox ledger, and a
+40-ticket OpenRouter sweep now gives Refundly its own measured silent-failure rate (15.8%); next is
+to extend that sweep so every ticket runs against a live sandbox capture end to end, not just the
+fault injector. After that: per-agent identity, so each worker acts under its own credential rather
+than the process's, and a process-conformance check alongside
 end-state verification, so a right outcome reached the wrong way is caught too.
 
 ## Built with
