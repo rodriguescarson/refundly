@@ -115,6 +115,9 @@ def build() -> None:
     if (SNAP / "briefing.wav").exists():  # spoken briefing needs a TTS backend; optional on OpenRouter
         shutil.copy(SNAP / "briefing.wav", SITE / "briefing.wav")
     shutil.copy(SNAP / "openapi.json", SITE / "openapi.json")
+    # The demo video and its poster ride along, so the site can link them from the same host.
+    if (ROOT / "media").is_dir():
+        shutil.copytree(ROOT / "media", SITE / "media")
     # Relative, so the docs work under a sub-path (GitHub Pages serves this at /refundly/).
     (SITE / "docs" / "index.html").write_text(
         (SNAP / "docs.html").read_text().replace("url: '/openapi.json'", "url: '../openapi.json'"))

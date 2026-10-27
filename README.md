@@ -18,6 +18,13 @@ for exactly what was rebuilt and why that keeps it eligible.
 
 ## For judges — try it in two minutes, no keys, no account
 
+**Watch first:** the [2:55 demo video](https://rodriguescarson.github.io/refundly/media/refundly-demo.mp4)
+· **click around:** the [live static console](https://rodriguescarson.github.io/refundly/app.html), built
+from the real 40-ticket sweep (read-only, no backend). The video is an edited walkthrough of that
+console plus the live PayPal sandbox run below. Its narration is OpenRouter `openai/gpt-audio`, its
+music is OpenRouter `google/lyria-3-pro-preview`, and the scene-2 "tool says success" card is
+labelled as an illustration.
+
 Everything below runs on an in-memory store with **no API key, no PayPal account, no cloud.**
 You need [`uv`](https://docs.astral.sh/uv/) and Python 3.13+.
 
