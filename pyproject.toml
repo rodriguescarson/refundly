@@ -15,6 +15,7 @@ dependencies = [
     "pydantic>=2.13.4",
     "python-dotenv>=1.2.3",
     "uvicorn[standard]>=0.52.4",
+    "mcp>=2.3.0",
 ]
 
 # The interpretability probe in probe/ is not part of the service. It needs a GPU box and

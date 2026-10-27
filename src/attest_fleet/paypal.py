@@ -19,6 +19,7 @@ import json
 import time
 import urllib.error
 import urllib.request
+import uuid
 
 from . import config
 
@@ -54,7 +55,7 @@ def _access_token() -> str:
     return _token["value"]
 
 
-def _api(method: str, path: str, body: dict | None = None) -> dict:
+def _api(method: str, path: str, body: dict | None = None, headers: dict | None = None) -> dict:
     req = urllib.request.Request(
         config.PAYPAL_BASE + path,
         data=json.dumps(body).encode() if body is not None else None,
@@ -62,6 +63,8 @@ def _api(method: str, path: str, body: dict | None = None) -> dict:
     )
     req.add_header("Authorization", f"Bearer {_access_token()}")
     req.add_header("Content-Type", "application/json")
+    for k, v in (headers or {}).items():
+        req.add_header(k, v)
     try:
         with urllib.request.urlopen(req, timeout=30) as r:
             raw = r.read()
@@ -129,16 +132,19 @@ def _capture_id_from(order: dict) -> str | None:
 
 def create_and_capture_order(amount: float, currency: str = "USD", card: dict | None = None) -> str:
     """Create an order paid by a sandbox test card and capture it; return the capture id."""
+    # Processing a card payment inline (payment_source present) requires an idempotency
+    # key; PayPal rejects order creation with PAYPAL_REQUEST_ID_REQUIRED without one.
     order = _api("POST", "/v2/checkout/orders", {
         "intent": "CAPTURE",
         "purchase_units": [{"amount": {"currency_code": currency, "value": f"{float(amount):.2f}"}}],
         "payment_source": {"card": card or _TEST_CARD},
-    })
+    }, headers={"PayPal-Request-Id": uuid.uuid4().hex})
     # A card order with intent=CAPTURE usually completes on creation; otherwise capture it.
     cap = _capture_id_from(order)
     if cap:
         return cap
-    captured = _api("POST", f"/v2/checkout/orders/{order['id']}/capture", {})
+    captured = _api("POST", f"/v2/checkout/orders/{order['id']}/capture", {},
+                    headers={"PayPal-Request-Id": uuid.uuid4().hex})
     cap = _capture_id_from(captured)
     if not cap:
         raise PayPalError(f"no capture id returned for order {order.get('id')}")
