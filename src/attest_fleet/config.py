@@ -12,15 +12,17 @@ load_dotenv()
 
 APP_NAME = "attest_fleet"
 
-# Gemini 3.7 Flash (newest agent-tuned Flash, Aug 2026) is the fleet tier; 3.5 is the hackathon floor.
-CONTROLLER_MODEL = os.getenv("ATTEST_CONTROLLER_MODEL", "gemini-3.7-flash")
-WORKER_MODEL = os.getenv("ATTEST_WORKER_MODEL", "gemini-3.7-flash")
-AUDITOR_MODEL = os.getenv("ATTEST_AUDITOR_MODEL", "gemma-4-31b-it")  # different family from the workers: independent verification (+ ATA extra-model bonus)
-VISION_MODEL = os.getenv("ATTEST_VISION_MODEL", "gemini-3.7-flash")
-VOICE_MODEL = os.getenv("ATTEST_VOICE_MODEL", "gemini-3.7-flash")  # audio intake: Gemini takes audio natively
-# TTS is Developer-API only (Vertex rejects the AUDIO response modality), same split as Gemma.
-BRIEFING_MODEL = os.getenv("ATTEST_BRIEFING_MODEL", "gemini-2.5-flash-preview-tts")
-BRIEFING_VOICE = os.getenv("ATTEST_BRIEFING_VOICE", "Kore")  # multimodal intake: reads screenshots attached to a ticket
+# Models run through OpenRouter (one key, any provider) via LiteLLM — no GCP project.
+# The auditor is a DIFFERENT model family from the workers, so verification stays independent.
+CONTROLLER_MODEL = os.getenv("ATTEST_CONTROLLER_MODEL", "openrouter/google/gemini-2.5-flash")
+WORKER_MODEL = os.getenv("ATTEST_WORKER_MODEL", "openrouter/google/gemini-2.5-flash")
+AUDITOR_MODEL = os.getenv("ATTEST_AUDITOR_MODEL", "openrouter/anthropic/claude-3.5-haiku")  # independent family
+VISION_MODEL = os.getenv("ATTEST_VISION_MODEL", "openrouter/google/gemini-2.5-flash")
+VOICE_MODEL = os.getenv("ATTEST_VOICE_MODEL", "openrouter/google/gemini-2.5-flash")
+# OpenRouter does not serve TTS, so the spoken briefing needs a separate provider (or stays
+# off). The core refund flow does not depend on it.
+BRIEFING_MODEL = os.getenv("ATTEST_BRIEFING_MODEL", "")
+BRIEFING_VOICE = os.getenv("ATTEST_BRIEFING_VOICE", "Kore")
 
 # --- Model fallback cascade ---------------------------------------------------
 # A brand-new Gemini Flash is demand-shed (HTTP 503) in the days after launch. Rather
@@ -70,14 +72,13 @@ def client_kwargs_for(model: str) -> dict:
     return {"api_key": os.getenv("GOOGLE_API_KEY", "")}
 
 
-# The last rung differs by backend: 3.5-flash-lite exists on the Developer API,
-# 3.5-flash is the equivalent floor on Vertex.
-_FLOOR = "gemini-3.5-flash" if (USE_VERTEX and VERTEX_PROJECT) else "gemini-3.5-flash-lite"
+# On a transient error the fleet degrades to a cheaper rung rather than failing a case.
+_FLOOR = os.getenv("ATTEST_FLOOR_MODEL", "openrouter/google/gemini-2.0-flash-001")
 
-CONTROLLER_CHAIN = _chain(CONTROLLER_MODEL, "gemini-3.6-flash", _FLOOR)
-WORKER_CHAIN = _chain(WORKER_MODEL, "gemini-3.6-flash", _FLOOR)
-VISION_CHAIN = _chain(VISION_MODEL, "gemini-3.6-flash", _FLOOR)
-AUDITOR_CHAIN = _chain(AUDITOR_MODEL, "gemma-4-26b-a4b-it")
+CONTROLLER_CHAIN = _chain(CONTROLLER_MODEL, _FLOOR)
+WORKER_CHAIN = _chain(WORKER_MODEL, _FLOOR)
+VISION_CHAIN = _chain(VISION_MODEL, _FLOOR)
+AUDITOR_CHAIN = _chain(AUDITOR_MODEL, "openrouter/openai/gpt-4o-mini")  # independent-family fallback
 
 MODEL_CHAINS = {
     "fleet_controller": CONTROLLER_CHAIN,
@@ -91,6 +92,15 @@ MODEL_CHAINS = {
 STORE_BACKEND = os.getenv("ATTEST_STORE", "memory")
 FIRESTORE_DATABASE = os.getenv("ATTEST_FIRESTORE_DATABASE", "(default)")
 GOOGLE_CLOUD_PROJECT = os.getenv("GOOGLE_CLOUD_PROJECT")
+
+# --- PayPal sandbox -----------------------------------------------------------
+# The agent's money actions (refund, cancel, capture) and the verifier's independent
+# read-back both go through PayPal. Create a sandbox app at developer.paypal.com.
+PAYPAL_CLIENT_ID = os.getenv("PAYPAL_CLIENT_ID", "")
+PAYPAL_SECRET = os.getenv("PAYPAL_SECRET", "")
+PAYPAL_ENV = os.getenv("PAYPAL_ENV", "sandbox")
+PAYPAL_BASE = "https://api-m.paypal.com" if PAYPAL_ENV == "live" else "https://api-m.sandbox.paypal.com"
+PAYPAL_READY = bool(PAYPAL_CLIENT_ID and PAYPAL_SECRET)
 
 # Policy: refunds above this amount need a human approval before the tool runs.
 REFUND_APPROVAL_THRESHOLD = float(os.getenv("ATTEST_REFUND_APPROVAL_THRESHOLD", "100"))

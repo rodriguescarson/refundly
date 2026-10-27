@@ -10,6 +10,7 @@ from typing import Optional
 
 from .domain import Check, Claim, Task, Verification
 from .store import BaseStore
+from . import paypal
 
 
 def _refund_checks(store: BaseStore, task: Task) -> list[Check]:
@@ -29,6 +30,19 @@ def _refund_checks(store: BaseStore, task: Task) -> list[Check]:
     pending = [r for r in store.query("refunds", order_id=task.order_id) if r.get("state") != "completed"]
     if pending:
         checks.append(Check(name="no_pending_refunds", passed=False, detail=f"{len(pending)} refund(s) stuck in {pending[0].get('state')}"))
+    # Independent read-back: for any PayPal-backed refund, re-query PayPal's OWN record rather
+    # than trusting the tool's reply or the local mirror. This is the verdict that matters — a
+    # refund the tool marked "completed" that PayPal still shows PENDING is a silent failure.
+    for r in store.query("refunds", order_id=task.order_id):
+        pid = r.get("paypal_refund_id")
+        if not pid:
+            continue
+        try:
+            pr = paypal.get_refund(pid)
+            checks.append(Check(name="paypal_refund_completed", passed=pr.get("status") == "COMPLETED",
+                                detail=f"PayPal refund {pid} status={pr.get('status')}"))
+        except paypal.PayPalError as e:
+            checks.append(Check(name="paypal_refund_reachable", passed=False, detail=f"read-back failed: {e}"))
     return checks
 
 
@@ -53,7 +67,17 @@ def _cancel_checks(store: BaseStore, task: Task) -> list[Check]:
     s = store.get("subscriptions", sub_id)
     if s is None:
         return [Check(name="subscription_exists", passed=False, detail=f"no subscription {sub_id}")]
-    return [Check(name="status_cancelled", passed=s.get("status") == "cancelled", detail=f"status is '{s.get('status')}'")]
+    checks = [Check(name="status_cancelled", passed=s.get("status") == "cancelled", detail=f"status is '{s.get('status')}'")]
+    # Independent read-back from PayPal's own record for PayPal-backed subscriptions.
+    pp_sub = s.get("paypal_subscription_id")
+    if pp_sub:
+        try:
+            ps = paypal.get_subscription(pp_sub)
+            checks.append(Check(name="paypal_subscription_cancelled", passed=ps.get("status") == "CANCELLED",
+                                detail=f"PayPal sub {pp_sub} status={ps.get('status')}"))
+        except paypal.PayPalError as e:
+            checks.append(Check(name="paypal_subscription_reachable", passed=False, detail=f"read-back failed: {e}"))
+    return checks
 
 
 def _unlock_checks(store: BaseStore, task: Task) -> list[Check]:

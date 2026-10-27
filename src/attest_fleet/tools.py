@@ -13,6 +13,7 @@ from typing import Any, Optional
 
 from .domain import new_id, now_iso
 from .store import get_store
+from . import config, paypal
 
 
 def _faulty(*key: Any) -> bool:
@@ -88,6 +89,31 @@ def issue_refund(order_id: str, amount: float, reason: str, run_id: str = "") ->
     if amount <= 0 or amount > remaining + 1e-9:
         return {"status": "error", "error": f"amount {amount} exceeds refundable balance {remaining}"}
     refund_id = new_id("ref")
+    capture_id = order.get("paypal_capture_id")
+
+    # Real path: refund the PayPal capture and record PayPal's own ids + status. The tool
+    # believes the state field; the verifier re-reads PayPal and does not.
+    if config.PAYPAL_READY and capture_id:
+        try:
+            pr = paypal.refund_capture(capture_id, amount)
+        except paypal.PayPalError as e:
+            store.set("refunds", refund_id, {"order_id": order_id, "amount": amount, "reason": reason,
+                "state": "failed", "error": str(e), "capture_id": capture_id, "created_at": now_iso()})
+            return {"status": "error", "error": str(e), "refund_id": refund_id, "state": "failed"}
+        pp_status = pr.get("status", "")
+        state = "completed" if pp_status == "COMPLETED" else "pending_gateway"
+        store.set("refunds", refund_id, {"order_id": order_id, "amount": amount, "reason": reason,
+            "state": state, "paypal_refund_id": pr.get("id"), "paypal_status": pp_status,
+            "capture_id": capture_id, "created_at": now_iso()})
+        if state == "completed":
+            new_refunded = round(float(order.get("refunded", 0)) + amount, 2)
+            store.update("orders", order_id, {"refunded": new_refunded,
+                "status": "refunded" if new_refunded >= float(order["total"]) else "partially_refunded"})
+        return {"status": "success", "refund_id": refund_id, "state": state,
+                "paypal_refund_id": pr.get("id"), "paypal_status": pp_status, "amount": amount}
+
+    # Mock path (PayPal not configured, or this order has no capture). The fault injector can
+    # still simulate a silent failure here for local demos and tests.
     if _faulty(run_id, "issue_refund", order_id, amount):
         # Gateway accepted the request and went quiet. Looks like success if you only read "status".
         store.set("refunds", refund_id, {"order_id": order_id, "amount": amount, "reason": reason, "state": "pending_gateway", "created_at": now_iso()})
@@ -123,6 +149,20 @@ def cancel_subscription(subscription_id: str, reason: str, run_id: str = "") -> 
         return {"status": "error", "error": f"no subscription {subscription_id}"}
     if s.get("status") == "cancelled":
         return {"status": "noop", "already_cancelled": True, "subscription_id": subscription_id}
+
+    # Real path: cancel the PayPal subscription; the verifier re-reads its status from PayPal.
+    pp_sub = s.get("paypal_subscription_id")
+    if config.PAYPAL_READY and pp_sub:
+        try:
+            paypal.cancel_subscription(pp_sub, reason)
+        except paypal.PayPalError as e:
+            store.update("subscriptions", subscription_id, {"status": "cancel_failed", "cancel_error": str(e)})
+            return {"status": "error", "error": str(e), "subscription_id": subscription_id, "state": "cancel_failed"}
+        store.update("subscriptions", subscription_id, {"status": "cancelled", "cancel_reason": reason,
+            "cancelled_at": now_iso(), "paypal_subscription_id": pp_sub})
+        return {"status": "success", "subscription_id": subscription_id, "state": "cancelled", "via": "paypal"}
+
+    # Mock path.
     if _faulty(run_id, "cancel_subscription", subscription_id):
         store.update("subscriptions", subscription_id, {"status": "cancel_requested", "cancel_reason": reason})
         return {"status": "success", "subscription_id": subscription_id, "message": "cancellation queued"}

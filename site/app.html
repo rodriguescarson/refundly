@@ -5,7 +5,7 @@
 <meta name="theme-color" content="#f4f7fc" id="themeColor">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Refundly</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230b0f10'/%3E%3Cpath d='M16 5l9 3v6c0 6-4 10-9 13-5-3-9-7-9-13V8z' fill='none' stroke='%230070e0' stroke-width='2'/%3E%3Cpath d='M11 16l3.5 3.5L22 12' fill='none' stroke='%230070e0' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='11' fill='%230a63d6'/%3E%3Cpath d='M26 11 A11 11 0 1 1 14 11' fill='none' stroke='white' stroke-width='3.4' stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
@@ -483,10 +483,14 @@ button, [role="tab"], .iconbtn{touch-action:manipulation; -webkit-tap-highlight-
   --mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
   --disp:"Bricolage Grotesque","Hanken Grotesk",system-ui,sans-serif; }
 :root[data-theme="light"]{
-  --bg:#f6f8fc; --surface:#ffffff; --surface-2:#eff3fa;
-  --ink:#0a1733; --ink-2:#434f74; --muted:#7c88a8; --faint:#9aa5c2;
-  --line:#e5eaf3; --line-soft:#eef2fa; --line-strong:#d4dcec;
-  --accent:#0070e0; --accent-ink:#ffffff; --accent-dim:rgba(0,112,224,.1);
+  --bg:#ffffff; --surface:#ffffff; --surface-2:#f4f5f7;
+  --ink:#0b0f17; --ink-2:#4b5563; --muted:#8a909c; --faint:#aab0ba;
+  --line:#e9eaee; --line-soft:#f1f2f5; --line-strong:#dcdee4;
+  --accent:#0a63d6; --accent-ink:#ffffff; --accent-dim:rgba(10,99,214,.1);
+  /* muted semantic set, matched to the landing — functional, not decorative */
+  --ok:#15835c; --ok-bg:#f2f8f5; --ok-line:#d2e6dc;
+  --warn:#9a6b17; --warn-bg:#faf4e9; --warn-line:#ecdcbf;
+  --crit:#c0414a; --crit-bg:#faf2f2; --crit-line:#e7cccd;
   --shadow:0 1px 3px rgba(16,42,97,.07);
   --shadow-lg:0 18px 48px -18px rgba(16,42,97,.28);
   --e1:0 1px 3px rgba(16,42,97,.06);
@@ -494,6 +498,7 @@ button, [role="tab"], .iconbtn{touch-action:manipulation; -webkit-tap-highlight-
 }
 /* Headings share the landing's display face so both pages read as one product. */
 h1,h2,h3,.sec-h,.why-lead{ font-family:var(--disp); letter-spacing:-.02em; }
+.brand .brandmark{ width:27px; height:27px; }
 /* Eyebrow label: uppercase blue monospace, the personal signature. */
 .hero-label{ font-family:var(--mono); text-transform:uppercase; letter-spacing:.14em;
   font-size:var(--t-sm); font-weight:600; color:var(--accent); }
@@ -522,8 +527,8 @@ h1,h2,h3,.sec-h,.why-lead{ font-family:var(--disp); letter-spacing:-.02em; }
 <div class="shell">
   <header class="topbar">
     <div class="brand">
-      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3l7 2.3v5c0 4.6-3 7.7-7 9.7-4-2-7-5.1-7-9.7v-5z" stroke="currentColor" stroke-width="1.7"/><path d="M8.5 12l2.6 2.6L15.8 9" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      <b>Refundly</b>
+      <svg class="brandmark" viewBox="0 0 40 40" fill="none" aria-hidden="true"><defs><marker id="rfm-c" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="9" refX="3.6" refY="4.5" orient="auto"><path d="M0 0 L8.5 4.5 L0 9 Z" fill="#fff"/></marker></defs><rect width="40" height="40" rx="11" fill="#0a63d6"/><path d="M26 11 A11 11 0 1 1 14 11" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" marker-end="url(#rfm-c)"/></svg>
+      <b>Refundly<span style="color:var(--accent)">.</span></b>
     </div>
     <span class="exbadge" id="exBadge" hidden>Example data</span>
     <span class="live"><i class="dot"></i><span id="liveState">live</span></span>

@@ -14,21 +14,9 @@ import socket
 import urllib.parse
 import urllib.request
 
-from google import genai
-from google.genai import types
+import litellm
 
 from . import config
-
-_client: genai.Client | None = None
-
-
-def _client_():
-    global _client
-    if _client is None:
-        # Route like every other Gemini role. This was hardcoded to the Developer API,
-        # which is the free-tier path the fleet was moved off, and contradicted the README.
-        _client = genai.Client(**config.client_kwargs_for(config.VISION_MODEL))
-    return _client
 
 
 MAX_IMAGE_BYTES = 8 * 1024 * 1024
@@ -94,12 +82,12 @@ PROMPT = (
 async def read_attachment(url: str) -> str:
     """Return a short factual description of the ticket's attached image."""
     data, mime = await asyncio.to_thread(_load_image, url)
-
-    def _call() -> str:
-        r = _client_().models.generate_content(
-            model=config.VISION_MODEL,
-            contents=[types.Part.from_bytes(data=data, mime_type=mime), PROMPT],
-        )
-        return (r.text or "").strip()
-
-    return await asyncio.to_thread(_call)
+    data_url = f"data:{mime};base64,{base64.b64encode(data).decode()}"
+    resp = await litellm.acompletion(
+        model=config.VISION_MODEL,
+        messages=[{"role": "user", "content": [
+            {"type": "text", "text": PROMPT},
+            {"type": "image_url", "image_url": {"url": data_url}},
+        ]}],
+    )
+    return (resp.choices[0].message.content or "").strip()

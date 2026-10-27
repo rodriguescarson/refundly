@@ -14,7 +14,7 @@ makes a per-task claim verifiable."""
 from __future__ import annotations
 
 from google.adk.agents import LlmAgent
-from google.adk.models import Gemini
+from google.adk.models.lite_llm import LiteLlm
 from google.adk.agents.readonly_context import ReadonlyContext
 
 from . import config, experience, policy, tools
@@ -87,8 +87,8 @@ you checked in evidence."""
 
 
 def _model(name: str):
-    """Bind a model id to the right backend: Vertex for Gemini, Developer API for Gemma."""
-    return Gemini(model=name, client_kwargs=config.client_kwargs_for(name))
+    """Every role runs through OpenRouter via LiteLLM — model ids are 'openrouter/<provider>/<model>'."""
+    return LiteLlm(model=name)
 
 def build_controller(model=None) -> LlmAgent:
     return LlmAgent(
@@ -148,7 +148,7 @@ def build_chat_fleet() -> LlmAgent:
         w.mode = "chat"
     return LlmAgent(
         name="fleet_controller",
-        model=config.CONTROLLER_MODEL,
+        model=_model(config.CONTROLLER_MODEL),
         description="Customer-operations fleet (interactive demo).",
         instruction=CONTROLLER_INSTRUCTION + "\n\nIn this interactive mode, delegate each task to the matching sub-agent and summarise what they report.",
         tools=list(tools.READ_TOOLS),
