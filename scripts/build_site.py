@@ -15,6 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SNAP = ROOT / "data" / "api-snapshot"
 SITE = ROOT / "site"
 HTML = ROOT / "src" / "attest_fleet" / "static" / "index.html"
+LAND = ROOT / "src" / "attest_fleet" / "static" / "landing.html"
 
 NOTICE = ("This is a static snapshot of the final run, taken 25 Oct 2026. The fleet service on "
           "Cloud Run is retired, so the kill switch, approvals and ticket trigger no longer act; "
@@ -99,7 +100,8 @@ def build() -> None:
     (SITE / "api" / "runs").mkdir(parents=True)
     (SITE / "api" / "fleet").mkdir(parents=True)
     (SITE / "docs").mkdir(parents=True)
-    (SITE / "index.html").write_text(h)
+    (SITE / "app.html").write_text(h)
+    shutil.copy(LAND, SITE / "index.html")  # landing page is the front door; console lives at /app.html
     for name in ["health.json", "metrics.json", "runs.json", "runs__interrupted.json", "approvals.json",
                  "briefing.json", "fleet/identities.json", "fleet/playbook.json"]:
         shutil.copy(SNAP / name, SITE / "api" / name)

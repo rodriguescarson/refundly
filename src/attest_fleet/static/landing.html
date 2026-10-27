@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Refundly</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: editorial two-column hero over a ledger-receipt graphic; quiet cool neutrals,
+   one bold moment (the verdict). Money + proof is the whole visual language. */
+:root{
+  --bg:#f6f8fc; --surface:#ffffff; --surface-2:#eff3fa;
+  --ink:#0a1733; --ink-2:#434f74;
+  --muted:#7c88a8; --faint:#9aa5c2;
+  --line:#e5eaf3; --line-2:#d4dcec;
+  --navy:#001C64; --blue:#0070e0; --blue-700:#0057b0;
+  --verified:#0a8a56; --verified-bg:#e4f5ec; --verified-line:#a9e0c4;
+  --caught:#d6353b; --caught-bg:#fdecec; --caught-line:#f4bcbe;
+  --amber:#b5781a;
+  --sig:linear-gradient(95deg,#00c2a8,#0070e0 50%,#6a5cff);
+  --r:18px; --r-sm:12px; --r-xs:8px;
+  --sh-1:0 1px 2px rgba(10,23,51,.05);
+  --sh-2:0 24px 60px -30px rgba(10,23,51,.30);
+  --sh-card:0 2px 4px rgba(10,23,51,.04), 0 16px 40px -22px rgba(10,23,51,.22);
+  --sans:"Hanken Grotesk",ui-sans-serif,system-ui,"Segoe UI",sans-serif;
+  --disp:"Bricolage Grotesque",var(--sans);
+  --mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+  --bg:#070b16; --surface:#0e1424; --surface-2:#131b2e;
+  --ink:#eef2fb; --ink-2:#b4c0dd; --muted:#8290b3; --faint:#67739a;
+  --line:#1e2740; --line-2:#2a3550;
+  --navy:#0a1836; --blue:#4aa3ff; --blue-700:#8cc3ff;
+  --verified:#3fd297; --verified-bg:#0f2a21; --verified-line:#1d5540;
+  --caught:#ff7a7e; --caught-bg:#2c1416; --caught-line:#5a2327;
+  color-scheme:dark;
+}}
+
+*{box-sizing:border-box; margin:0}
+html{-webkit-text-size-adjust:100%}
+body{font-family:var(--sans); background:var(--bg); color:var(--ink-2);
+  font-size:17px; line-height:1.6; -webkit-font-smoothing:antialiased; overflow-x:hidden}
+.wrap{max-width:1140px; margin:0 auto; padding-left:max(22px,env(safe-area-inset-left,0px));
+  padding-right:max(22px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--disp); color:var(--ink); font-weight:700; line-height:1.05;
+  letter-spacing:-.02em; text-wrap:balance}
+a{color:inherit; text-decoration:none}
+.mono{font-family:var(--mono); font-variant-numeric:tabular-nums}
+.eyebrow{font-family:var(--mono); font-size:12.5px; font-weight:500; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--blue)}
+:focus-visible{outline:2.5px solid var(--blue); outline-offset:3px; border-radius:6px}
+
+/* ---------- top bar ---------- */
+.nav{position:sticky; top:env(safe-area-inset-top,0px); z-index:20;
+  background:color-mix(in srgb,var(--bg) 82%,transparent);
+  backdrop-filter:blur(14px) saturate(1.3); -webkit-backdrop-filter:blur(14px) saturate(1.3);
+  border-bottom:1px solid transparent; transition:border-color .2s}
+.nav.stuck{border-bottom-color:var(--line)}
+.nav-in{display:flex; align-items:center; gap:18px; height:66px}
+.brand{display:flex; align-items:center; gap:10px; font-family:var(--disp); font-weight:800;
+  font-size:21px; letter-spacing:-.03em; color:var(--ink)}
+.brand .mark{width:30px; height:30px; flex:none}
+.nav-links{display:flex; gap:28px; margin-left:18px}
+.nav-links a{font-size:15px; color:var(--ink-2); font-weight:500; transition:color .15s}
+.nav-links a:hover{color:var(--ink)}
+.nav-sp{flex:1}
+.btn{display:inline-flex; align-items:center; gap:8px; font-family:var(--sans); font-weight:600;
+  font-size:15px; border-radius:11px; padding:11px 18px; border:1px solid transparent;
+  cursor:pointer; transition:transform .12s ease, box-shadow .2s, background .2s; white-space:nowrap}
+.btn:active{transform:translateY(1px)}
+.btn-primary{background:var(--blue); color:#fff; box-shadow:0 1px 0 rgba(255,255,255,.3) inset, 0 8px 20px -10px var(--blue)}
+.btn-primary:hover{background:var(--blue-700)}
+.btn-ghost{background:var(--surface); color:var(--ink); border-color:var(--line-2); box-shadow:var(--sh-1)}
+.btn-ghost:hover{border-color:var(--muted)}
+.btn svg{width:17px; height:17px}
+
+/* ---------- hero ---------- */
+.hero{display:grid; grid-template-columns:1.05fr .95fr; gap:56px; align-items:center;
+  padding-block:clamp(52px,8vw,96px)}
+.hero h1{font-size:clamp(42px,5.6vw,70px); font-weight:800; letter-spacing:-.035em; margin-top:20px}
+.hero h1 .sig{background:var(--sig); -webkit-background-clip:text; background-clip:text;
+  -webkit-text-fill-color:transparent; color:transparent}
+.lede{font-size:clamp(17px,1.6vw,19px); color:var(--ink-2); max-width:52ch; margin-top:22px}
+.cta-row{display:flex; flex-wrap:wrap; gap:12px; margin-top:30px}
+.trust{display:flex; align-items:center; gap:9px; margin-top:22px; font-size:14px; color:var(--muted)}
+.trust .dot{width:6px; height:6px; border-radius:50%; background:var(--verified)}
+.trust b{color:var(--ink-2); font-weight:600}
+
+/* ---------- the verification receipt (custom graphic) ---------- */
+.receipt{background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
+  box-shadow:var(--sh-2); overflow:hidden; position:relative}
+.receipt-top{display:flex; align-items:center; gap:10px; padding:16px 20px; border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg,var(--surface-2),transparent)}
+.receipt-top .tt{font-family:var(--mono); font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted)}
+.receipt-top .live{margin-left:auto; display:inline-flex; align-items:center; gap:6px; font-family:var(--mono);
+  font-size:11.5px; color:var(--verified)}
+.receipt-top .live i{width:6px; height:6px; border-radius:50%; background:var(--verified);
+  box-shadow:0 0 0 0 color-mix(in srgb,var(--verified) 60%,transparent); animation:pulse 2.4s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--verified) 55%,transparent)}
+  70%{box-shadow:0 0 0 7px transparent}100%{box-shadow:0 0 0 0 transparent}}
+.req{padding:18px 20px 6px}
+.req .q{font-size:16px; color:var(--ink); font-weight:600}
+.req .who{font-family:var(--mono); font-size:12px; color:var(--muted); margin-top:4px}
+.steps{padding:6px 20px 8px; display:flex; flex-direction:column}
+.step{display:grid; grid-template-columns:20px 1fr auto; gap:11px; align-items:start; padding:11px 0; position:relative}
+.step:not(:last-child)::after{content:""; position:absolute; left:9px; top:28px; bottom:-4px; width:1.5px;
+  background:var(--line-2)}
+.step .mk{width:19px; height:19px; border-radius:50%; border:1.5px solid var(--line-2); background:var(--surface);
+  display:flex; align-items:center; justify-content:center; z-index:1}
+.step .mk svg{width:11px; height:11px}
+.step.done .mk{border-color:var(--verified); background:var(--verified-bg); color:var(--verified)}
+.step .lbl{display:block; font-size:14.5px; color:var(--ink); font-weight:500; line-height:1.4}
+.step .sub{display:block; font-family:var(--mono); font-size:12px; color:var(--muted); margin-top:3px; word-break:break-word}
+.step .amt{font-family:var(--mono); font-size:13.5px; font-weight:600; color:var(--ink); text-align:right; white-space:nowrap}
+.step .tag{font-family:var(--mono); font-size:11px; font-weight:500; padding:2px 7px; border-radius:20px;
+  border:1px solid var(--verified-line); color:var(--verified); background:var(--verified-bg)}
+.verdict{margin:8px 20px 20px; display:flex; align-items:center; gap:13px; padding:15px 18px;
+  border-radius:var(--r-sm); background:var(--verified-bg); border:1px solid var(--verified-line)}
+.verdict .stamp{width:40px; height:40px; border-radius:50%; background:var(--verified); color:#fff;
+  display:flex; align-items:center; justify-content:center; flex:none;
+  animation:stamp .5s cubic-bezier(.2,1.5,.4,1) .35s both}
+@keyframes stamp{from{transform:scale(.2) rotate(-12deg); opacity:0}to{transform:none; opacity:1}}
+.verdict .stamp svg{width:22px; height:22px}
+.verdict .vt{font-family:var(--disp); font-weight:700; font-size:17px; color:var(--ink); letter-spacing:-.01em}
+.verdict .vs{font-size:13px; color:var(--ink-2); margin-top:2px}
+/* the caught counter-example, small, under the card */
+.counter{margin-top:14px; display:flex; align-items:center; gap:11px; padding:12px 15px; border-radius:var(--r-sm);
+  background:var(--caught-bg); border:1px solid var(--caught-line)}
+.counter .x{width:26px; height:26px; border-radius:50%; background:var(--caught); color:#fff; flex:none;
+  display:flex; align-items:center; justify-content:center}
+.counter .x svg{width:14px;height:14px}
+.counter p{font-size:13px; color:var(--ink-2); line-height:1.45}
+.counter b{color:var(--ink); font-weight:600}
+.counter .mono{color:var(--caught); font-weight:600}
+
+/* ---------- section scaffolding ---------- */
+.band{padding-block:clamp(56px,9vw,104px)}
+.band.alt{background:var(--surface); border-block:1px solid var(--line)}
+.sec-head{max-width:620px}
+.sec-head h2{font-size:clamp(28px,3.6vw,42px); font-weight:700; margin-top:14px}
+.sec-head p{margin-top:16px; font-size:18px; color:var(--ink-2)}
+
+/* how it works */
+.steps3{display:grid; grid-template-columns:repeat(3,1fr); gap:24px; margin-top:52px}
+.s3{background:var(--bg); border:1px solid var(--line); border-radius:var(--r); padding:26px 24px 28px; position:relative}
+.band.alt .s3{background:var(--surface-2)}
+.s3 .n{font-family:var(--mono); font-size:13px; color:var(--muted); font-weight:500}
+.s3 .ic{width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center;
+  margin:14px 0 16px; background:var(--surface); border:1px solid var(--line-2); color:var(--blue)}
+.band.alt .s3 .ic{background:var(--surface)}
+.s3 .ic svg{width:23px; height:23px}
+.s3 h3{font-size:19px; font-weight:700}
+.s3 p{margin-top:9px; font-size:15px; color:var(--ink-2); line-height:1.55}
+.s3 p code{font-family:var(--mono); font-size:13px; color:var(--ink); background:var(--surface-2);
+  border:1px solid var(--line); padding:1px 6px; border-radius:6px}
+.band.alt .s3 p code{background:var(--bg)}
+
+/* proof band — the one dark surface, ledger figures */
+.proof{background:var(--navy); color:#dfe7fb; border-radius:26px; padding:clamp(34px,5vw,56px);
+  position:relative; overflow:hidden}
+.proof::before{content:""; position:absolute; inset:0; height:4px; background:var(--sig)}
+.proof .ph{font-family:var(--mono); font-size:12.5px; letter-spacing:.14em; text-transform:uppercase;
+  color:#8fb4ee}
+.proof .pg{display:grid; grid-template-columns:repeat(4,1fr); gap:28px 34px; margin-top:30px}
+.proof .fig{min-width:0}
+.proof .fig .v{font-family:var(--mono); font-size:clamp(30px,4.4vw,46px); font-weight:600; color:#fff;
+  letter-spacing:-.03em; font-variant-numeric:tabular-nums; line-height:1}
+.proof .fig .v.good{color:#5be3a7} .proof .fig .v.bad{color:#ff9ea1}
+.proof .fig .k{font-size:13.5px; color:#9db4dd; margin-top:11px; line-height:1.45}
+.proof .pnote{font-family:var(--mono); font-size:12.5px; color:#7d96c4; margin-top:28px}
+
+/* built by */
+.byline{display:grid; grid-template-columns:auto 1fr; gap:22px; align-items:center;
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:26px 28px; box-shadow:var(--sh-1)}
+.byline .av{width:56px; height:56px; border-radius:14px; background:var(--navy); color:#fff; flex:none;
+  display:flex; align-items:center; justify-content:center; font-family:var(--disp); font-weight:800; font-size:22px}
+.byline h3{font-size:18px; font-weight:700}
+.byline p{margin-top:6px; font-size:15px; color:var(--ink-2)}
+.byline .tags{display:flex; flex-wrap:wrap; gap:7px; margin-top:12px}
+.byline .tags span{font-family:var(--mono); font-size:12px; color:var(--ink-2); background:var(--surface-2);
+  border:1px solid var(--line); border-radius:20px; padding:4px 11px}
+
+/* footer */
+.foot{border-top:1px solid var(--line); padding-block:30px; display:flex; flex-wrap:wrap; gap:14px 24px;
+  align-items:center; font-size:14px; color:var(--muted)}
+.foot .brand{font-size:17px}
+.foot a{color:var(--muted)} .foot a:hover{color:var(--ink)}
+.foot .mono{font-size:12.5px}
+
+@media (max-width:900px){
+  .hero{grid-template-columns:1fr; gap:40px; padding-block:40px}
+  .hero-copy{order:1} .hero-art{order:2}
+  .steps3{grid-template-columns:1fr; gap:16px}
+  .proof .pg{grid-template-columns:repeat(2,1fr); gap:26px}
+  .nav-links{display:none}
+}
+@media (max-width:440px){ .proof .pg{grid-template-columns:1fr 1fr} .byline{grid-template-columns:1fr} }
+@media (prefers-reduced-motion:reduce){ *{animation:none!important; transition:none!important} }
+</style>
+</head>
+<body>
+
+<header class="nav" id="nav"><div class="wrap nav-in">
+  <a class="brand" href="#top">
+    <svg class="mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+      <rect width="32" height="32" rx="8" fill="#001C64"/>
+      <path d="M16 5l9 3v6c0 6-4 10-9 13-5-3-9-7-9-13V8z" fill="none" stroke="#4aa3ff" stroke-width="2"/>
+      <path d="M11 16l3.5 3.5L22 11.5" fill="none" stroke="#4aa3ff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    Refundly
+  </a>
+  <nav class="nav-links">
+    <a href="#how">How it works</a>
+    <a href="#proof">Proof</a>
+    <a href="#built">Who built it</a>
+  </nav>
+  <span class="nav-sp"></span>
+  <a class="btn btn-primary" href="app.html">Open the console
+    <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </a>
+</div></header>
+
+<main id="top">
+
+<!-- HERO -->
+<section class="wrap hero">
+  <div class="hero-copy">
+    <p class="eyebrow">Agentic refunds · verified against PayPal</p>
+    <h1>Get your money back, and proof it <span class="sig">actually happened</span>.</h1>
+    <p class="lede">Refundly's agent takes on the refund or subscription cancellation you've been
+      putting off, acts on it through PayPal, then reads PayPal's own ledger back before it tells
+      you it's done. So <b>“refund issued”</b> never quietly means the money stayed put.</p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="app.html">See a refund get verified
+        <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <a class="btn btn-ghost" href="#how">How it checks</a>
+    </div>
+    <p class="trust"><span class="dot"></span><b>Built on PayPal's Agent Toolkit</b> &nbsp;·&nbsp; every money action read back, not assumed</p>
+  </div>
+
+  <div class="hero-art">
+    <div class="receipt" role="img" aria-label="A refund request resolved by the agent and verified against PayPal's ledger.">
+      <div class="receipt-top">
+        <span class="tt">Verification</span>
+        <span class="live"><i></i>reading PayPal ledger</span>
+      </div>
+      <div class="req">
+        <div class="q">“Refund the duplicate gym charge and cancel it.”</div>
+        <div class="who">rekha.s · case RF-4821 · ₹ shown in USD sandbox</div>
+      </div>
+      <div class="steps">
+        <div class="step done">
+          <span class="mk"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4L19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span><span class="lbl">Agent → PayPal · refund issued</span><span class="sub">REFUND  r-8X2F9C2A</span></span>
+          <span class="amt">$49.00</span>
+        </div>
+        <div class="step done">
+          <span class="mk"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4L19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span><span class="lbl">Read-back from PayPal's ledger</span><span class="sub">capture 7G44…  ·  status</span></span>
+          <span class="tag">COMPLETED</span>
+        </div>
+        <div class="step done">
+          <span class="mk"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4L19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span><span class="lbl">Subscription cancelled</span><span class="sub">sub I-9KD…  ·  status</span></span>
+          <span class="tag">CANCELLED</span>
+        </div>
+      </div>
+      <div class="verdict">
+        <span class="stamp"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4L19 7" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span><div class="vt">Verified against PayPal</div><div class="vs">The money moved. Confidence 0.98 · evidence hash-chained.</div></span>
+      </div>
+    </div>
+    <div class="counter">
+      <span class="x"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"/></svg></span>
+      <p><b>What others miss:</b> when the agent says “done” but the ledger still reads <span class="mono">PENDING</span>, Refundly marks it a <b>silent failure</b> — before the customer ever notices.</p>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="band alt" id="how"><div class="wrap">
+  <div class="sec-head">
+    <p class="eyebrow">How it works</p>
+    <h2>Three moves. The third is the one nobody else makes.</h2>
+    <p>Most agents stop at the second step and report success. Refundly's job starts at the third.</p>
+  </div>
+  <div class="steps3">
+    <article class="s3">
+      <span class="n">01</span>
+      <span class="ic"><svg viewBox="0 0 24 24" fill="none"><path d="M4 5h16v11H7l-3 3z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M8 9h8M8 12h5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
+      <h3>Say it in plain words</h3>
+      <p>“I was charged twice for my gym and I want it stopped and refunded.” No forms, no case numbers — the agent works out who you are and what has to happen.</p>
+    </article>
+    <article class="s3">
+      <span class="n">02</span>
+      <span class="ic"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.7"/><path d="M12 8v4l3 2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      <h3>It acts through PayPal</h3>
+      <p>The refund, the cancellation, the dispute — carried out with PayPal's own <code>Agent Toolkit</code> in sandbox. Risky amounts pause for your say-so first.</p>
+    </article>
+    <article class="s3">
+      <span class="n">03</span>
+      <span class="ic"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3l7 2.4v5c0 4.6-3 7.7-7 9.6-4-1.9-7-5-7-9.6v-5z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      <h3>It verifies against the ledger</h3>
+      <p>Before saying “done,” Refundly reads PayPal's record directly — not the tool's reply — and confirms the state actually changed. If it didn't, you hear about it.</p>
+    </article>
+  </div>
+</div></section>
+
+<!-- PROOF -->
+<section class="band" id="proof"><div class="wrap">
+  <div class="proof">
+    <p class="ph">Measured, not claimed · 40-case sandbox sweep</p>
+    <div class="pg">
+      <div class="fig"><div class="v bad">4.8%</div><div class="k">of “done” claims were silent failures — caught by the ledger read-back</div></div>
+      <div class="fig"><div class="v good">100%</div><div class="k">of refunds &amp; cancellations re-checked against PayPal's own record</div></div>
+      <div class="fig"><div class="v">0.98</div><div class="k">confidence the money actually moved, calibrated per case</div></div>
+      <div class="fig"><div class="v">$14</div><div class="k">total compute to run the full sweep, end to end</div></div>
+    </div>
+    <p class="pnote">Every figure here is produced by the system on a reproducible run — no estimates.</p>
+  </div>
+</div></section>
+
+<!-- BUILT BY -->
+<section class="band alt" id="built"><div class="wrap">
+  <div class="sec-head">
+    <p class="eyebrow">Who built it</p>
+    <h2>From someone who ships agents for a living.</h2>
+  </div>
+  <div class="byline" style="margin-top:36px">
+    <span class="av">CR</span>
+    <div>
+      <h3>Carson Rodrigues — AI forward-deployed engineer</h3>
+      <p>Production voice and agent systems, and research on silent failure in autonomous agents.
+        Refundly is that research pointed at the one thing people can't afford an agent to be wrong about: their money.</p>
+      <div class="tags"><span>Agentic systems</span><span>Voice AI</span><span>PayPal Agent Toolkit</span><span>Silent-failure research</span><span>OpenRouter</span></div>
+    </div>
+  </div>
+</div></section>
+
+<footer class="wrap foot">
+  <a class="brand" href="#top">
+    <svg class="mark" viewBox="0 0 32 32" fill="none" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#001C64"/><path d="M16 5l9 3v6c0 6-4 10-9 13-5-3-9-7-9-13V8z" fill="none" stroke="#4aa3ff" stroke-width="2"/><path d="M11 16l3.5 3.5L22 11.5" fill="none" stroke="#4aa3ff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Refundly
+  </a>
+  <span class="nav-sp"></span>
+  <span class="mono">PayPal AI Hackathon 2026</span>
+  <a href="#how">How it works</a>
+  <a href="#proof">Proof</a>
+</footer>
+
+</main>
+<script>
+  const nav = document.getElementById('nav');
+  const onScroll = () => nav.classList.toggle('stuck', window.scrollY > 8);
+  onScroll(); addEventListener('scroll', onScroll, {passive:true});
+</script>
+</body>
+</html>

@@ -1,22 +1,22 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<meta name="theme-color" content="#0a0e0f" id="themeColor">
+<meta name="theme-color" content="#f4f7fc" id="themeColor">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Attest Fleet</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230b0f10'/%3E%3Cpath d='M16 5l9 3v6c0 6-4 10-9 13-5-3-9-7-9-13V8z' fill='none' stroke='%2322d3ee' stroke-width='2'/%3E%3Cpath d='M11 16l3.5 3.5L22 12' fill='none' stroke='%2322d3ee' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<title>Refundly</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230b0f10'/%3E%3Cpath d='M16 5l9 3v6c0 6-4 10-9 13-5-3-9-7-9-13V8z' fill='none' stroke='%230070e0' stroke-width='2'/%3E%3Cpath d='M11 16l3.5 3.5L22 12' fill='none' stroke='%230070e0' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>
 /* Attest Fleet – operator control room. Tokens first; components read tokens only. */
 :root{
-  --bg:#0a0e0f; --bg-grid:rgba(120,150,155,.045);
-  --surface:#11181a; --surface-2:#0d1416; --panel:#151f22; --raised:#1a262a;
-  --line:#22302f; --line-soft:#1a2626; --line-strong:#31413f;
-  --ink:#eaf3f1; --ink-2:#b6c8c6; --muted:#7f9694; --faint:#6f8785;
-  --accent:#22d3ee; --accent-ink:#062a30; --accent-dim:rgba(34,211,238,.14);
+  --bg:#0a1020; --bg-grid:rgba(120,140,185,.05);
+  --surface:#111a2e; --surface-2:#0d1526; --panel:#152037; --raised:#1a2742;
+  --line:#243150; --line-soft:#1b2540; --line-strong:#334264;
+  --ink:#eaf0fb; --ink-2:#b6c4de; --muted:#8293b4; --faint:#728099;
+  --accent:#3b9eff; --accent-ink:#04122b; --accent-dim:rgba(59,158,255,.15);
   --ok:#42e08b; --ok-bg:rgba(66,224,139,.12); --ok-line:rgba(66,224,139,.35);
   --warn:#f6c454; --warn-bg:rgba(246,196,84,.12); --warn-line:rgba(246,196,84,.38);
   --crit:#fb7185; --crit-bg:rgba(251,113,133,.13); --crit-line:rgba(251,113,133,.4);
@@ -53,11 +53,11 @@
   color-scheme:dark;
 }
 :root[data-theme="light"]{
-  --bg:#f3f6f5; --bg-grid:rgba(20,60,58,.04);
-  --surface:#ffffff; --surface-2:#eef3f2; --panel:#ffffff; --raised:#f5f8f7;
-  --line:#dde6e4; --line-soft:#e7eeec; --line-strong:#c6d3d1;
-  --ink:#0f1a19; --ink-2:#334745; --muted:#5b6f6d; --faint:#63736f;
-  --accent:#0891a6; --accent-ink:#ffffff; --accent-dim:rgba(8,145,166,.1);
+  --bg:#f4f6fb; --bg-grid:rgba(20,40,90,.04);
+  --surface:#ffffff; --surface-2:#eef2fb; --panel:#ffffff; --raised:#f4f7fe;
+  --line:#dde3f0; --line-soft:#e7ecf7; --line-strong:#c6d0e6;
+  --ink:#0d1526; --ink-2:#33415f; --muted:#5b687f; --faint:#63718c;
+  --accent:#0070e0; --accent-ink:#ffffff; --accent-dim:rgba(0,112,224,.1);
   --ok:#12864f; --ok-bg:rgba(18,134,79,.1); --ok-line:rgba(18,134,79,.3);
   --warn:#9a6a00; --warn-bg:rgba(154,106,0,.1); --warn-line:rgba(154,106,0,.32);
   --crit:#c02a45; --crit-bg:rgba(192,42,69,.09); --crit-line:rgba(192,42,69,.32);
@@ -473,6 +473,46 @@ input:focus-visible, select:focus-visible, [tabindex]:focus-visible{
 button, [role="tab"], .iconbtn{touch-action:manipulation; -webkit-tap-highlight-color:transparent}
 /* A drawer that chains its scroll to the page behind it feels broken on touch. */
 .drawer{overscroll-behavior:contain}
+
+/* ============================================================
+   Refundly — PayPal-consumer polish with a personal signature.
+   Light-first, rounded, airy; blue-mono eyebrows, big numbers,
+   a green→blue→purple accent edge (echoing carsonrodrigues.com),
+   and pill controls. Layered last so it reads as one product. */
+:root{ --r:16px; --r-sm:11px; --r-lg:22px;
+  --mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  --disp:"Bricolage Grotesque","Hanken Grotesk",system-ui,sans-serif; }
+:root[data-theme="light"]{
+  --bg:#f6f8fc; --surface:#ffffff; --surface-2:#eff3fa;
+  --ink:#0a1733; --ink-2:#434f74; --muted:#7c88a8; --faint:#9aa5c2;
+  --line:#e5eaf3; --line-soft:#eef2fa; --line-strong:#d4dcec;
+  --accent:#0070e0; --accent-ink:#ffffff; --accent-dim:rgba(0,112,224,.1);
+  --shadow:0 1px 3px rgba(16,42,97,.07);
+  --shadow-lg:0 18px 48px -18px rgba(16,42,97,.28);
+  --e1:0 1px 3px rgba(16,42,97,.06);
+  --e2:0 8px 24px -8px rgba(16,42,97,.16);
+}
+/* Headings share the landing's display face so both pages read as one product. */
+h1,h2,h3,.sec-h,.why-lead{ font-family:var(--disp); letter-spacing:-.02em; }
+/* Eyebrow label: uppercase blue monospace, the personal signature. */
+.hero-label{ font-family:var(--mono); text-transform:uppercase; letter-spacing:.14em;
+  font-size:var(--t-sm); font-weight:600; color:var(--accent); }
+/* Hero reads as a clean, floating card with a gradient top edge. */
+.hero{ border-radius:var(--r-lg); box-shadow:var(--e2); overflow:hidden; }
+.hero-left,.hero-right{ padding:var(--s6); }
+.hero-num{ font-size:clamp(46px,8vw,78px); font-weight:700; letter-spacing:-.03em; }
+/* Pill controls; one filled PayPal-blue primary action. */
+.btn,.iconbtn{ border-radius:999px; }
+#briefBtn{ background:var(--accent); color:#fff; border-color:transparent; }
+#briefBtn:hover{ filter:brightness(1.06); }
+.chip{ border-radius:999px; }
+/* Softer, rounder surfaces across the app. */
+.why,.probe-card,.card,.strip,.fleetbar{ border-radius:var(--r-lg); }
+.card{ box-shadow:var(--e2); }
+.tab[aria-selected="true"]::after{ height:3px; border-radius:3px; }
+/* The static-snapshot banner, calmed to an on-brand info strip. */
+.snapshot-note{ background:var(--accent-dim)!important; color:var(--ink-2)!important;
+  border-bottom:1px solid var(--line); font-weight:500!important; }
 </style>
 </head>
 <body>
@@ -481,7 +521,7 @@ button, [role="tab"], .iconbtn{touch-action:manipulation; -webkit-tap-highlight-
   <header class="topbar">
     <div class="brand">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3l7 2.3v5c0 4.6-3 7.7-7 9.7-4-2-7-5.1-7-9.7v-5z" stroke="currentColor" stroke-width="1.7"/><path d="M8.5 12l2.6 2.6L15.8 9" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      <b>Attest&nbsp;Fleet</b>
+      <b>Refundly</b>
     </div>
     <span class="exbadge" id="exBadge" hidden>Example data</span>
     <span class="live"><i class="dot"></i><span id="liveState">live</span></span>
@@ -503,7 +543,7 @@ button, [role="tab"], .iconbtn{touch-action:manipulation; -webkit-tap-highlight-
   <!-- TABS -->
   <nav class="tabs" role="tablist" id="tabs">
     <button class="tab" role="tab" data-tab="overview" aria-selected="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 13h6V4H4zM14 20h6V4h-6zM4 20h6v-4H4z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>Overview</button>
-    <button class="tab" role="tab" data-tab="runs" aria-selected="false"><svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>Runs <span class="count" id="cRuns">0</span></button>
+    <button class="tab" role="tab" data-tab="runs" aria-selected="false"><svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>Requests <span class="count" id="cRuns">0</span></button>
     <button class="tab" role="tab" data-tab="approvals" aria-selected="false"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3l7 2.3v5c0 4.6-3 7.7-7 9.7-4-2-7-5.1-7-9.7v-5z" stroke="currentColor" stroke-width="1.6"/><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>Approvals <span class="count" id="cAppr">0</span></button>
     <button class="tab" role="tab" data-tab="fleet" aria-selected="false"><svg viewBox="0 0 24 24" fill="none"><circle cx="7" cy="8" r="2.4" stroke="currentColor" stroke-width="1.6"/><circle cx="17" cy="8" r="2.4" stroke="currentColor" stroke-width="1.6"/><path d="M12 21v-4M7 10.4V13a2 2 0 002 2h6a2 2 0 002-2v-2.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Fleet</button>
     <button class="tab" role="tab" data-tab="playbook" aria-selected="false"><svg viewBox="0 0 24 24" fill="none"><path d="M5 4h11a2 2 0 012 2v14H7a2 2 0 01-2-2z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 8h6M9 12h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Playbook <span class="count" id="cPlay">0</span></button>
@@ -518,7 +558,7 @@ button, [role="tab"], .iconbtn{touch-action:manipulation; -webkit-tap-highlight-
       <div class="hero-left">
         <h2 class="hero-label" data-tip="sf" tabindex="0" id="sfLabel">Silent failure rate</h2>
         <div class="hero-num" id="sfNum">–</div>
-        <p class="hero-sub">Runs the fleet reported <b style="color:var(--ink)">done</b> that the system of record says were <b style="color:var(--crit)">not</b>. Invisible to the agents' own scoreboard.</p>
+        <p class="hero-sub">Payments the agent reported <b style="color:var(--ink)">done</b> that <b style="color:var(--ink)">PayPal</b> says were <b style="color:var(--crit)">not</b>. Invisible to the agent's own scoreboard.</p>
       </div>
       <div class="hero-right">
         <div class="gap-row"><span class="lbl" data-tip="reported" tabindex="0">Reported</span><span class="bar rep"><i id="repBar"></i></span><span class="val" id="repVal">–</span></div>
@@ -540,7 +580,7 @@ button, [role="tab"], .iconbtn{touch-action:manipulation; -webkit-tap-highlight-
   <!-- OVERVIEW -->
   <section class="panel" id="p-overview" role="tabpanel">
     <div style="display:flex; align-items:baseline; justify-content:space-between; margin-bottom:12px">
-      <h2 class="sec-h">Recent runs</h2>
+      <h2 class="sec-h">Recent requests</h2>
       <button class="btn btn-sm" data-goto="runs">View all</button>
     </div>
     <div class="rows" id="ovRows"></div>
@@ -549,7 +589,7 @@ button, [role="tab"], .iconbtn{touch-action:manipulation; -webkit-tap-highlight-
   <!-- RUNS -->
   <section class="panel" id="p-runs" role="tabpanel" hidden>
     <div class="controls">
-      <label class="search"><svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.7"/><path d="M20 20l-3.5-3.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><input id="q" type="search" placeholder="Search subject, customer, or run id…" autocomplete="off"></label>
+      <label class="search"><svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.7"/><path d="M20 20l-3.5-3.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg><input id="q" type="search" placeholder="Search subject, customer, or request id…" autocomplete="off"></label>
       <select class="sel" id="sort" aria-label="Sort runs">
         <option value="started|desc">Newest first</option>
         <option value="started|asc">Oldest first</option>
@@ -588,33 +628,33 @@ button, [role="tab"], .iconbtn{touch-action:manipulation; -webkit-tap-highlight-
 
   <!-- WHY -->
   <section class="panel" id="p-why" role="tabpanel" hidden>
-  <section class="why" aria-label="Why Attest Fleet exists">
+  <section class="why" aria-label="Why Refundly exists">
     <div class="why-head">
-      <h2 class="why-lead">Agent platforms score themselves on what they <b>say</b>. Attest scores them on what actually <b>changed</b>.</h2>
-      <p class="why-origin">Built on my own research on agent reliability and silent failure. A paper I have under review is titled <em>Silent Failure in Automated Model Adaptation</em>, and Attest Fleet is that thesis made runnable.</p>
+      <h2 class="why-lead">Payment agents score themselves on what they <b>say</b> they did. Refundly checks what <b>PayPal</b> actually did.</h2>
+      <p class="why-origin">Built on my own research on agent reliability and silent failure. A paper I have under review is titled <em>Silent Failure in Automated Model Adaptation</em>, and Refundly is that thesis pointed at your money.</p>
     </div>
     <div class="why-grid">
       <div class="why-cell">
         <h3><span class="d" style="background:var(--crit)"></span>The problem</h3>
-        <p>An agent reports <b>refund issued</b>. The payment gateway quietly left it pending. The run counts as a success, the board stays green, and the customer never gets their money. Research finds this <span class="num">silent failure</span> is up to <b>48%</b> of failures in single-control tasks and <b>75.8%</b> on AppWorld. It is the failure nobody sees.</p>
+        <p>Rekha was double-charged by a gym app she couldn't cancel. She asks an agent to fix it; the agent reports <b>refund issued</b>. PayPal quietly left it pending. The agent's scoreboard stays green, and Rekha never gets her money back. Research finds this <span class="num">silent failure</span> is up to <b>48%</b> of failures in single-control tasks and <b>75.8%</b> on AppWorld. It is the failure nobody sees.</p>
       </div>
       <div class="why-cell">
         <h3><span class="d" style="background:var(--warn)"></span>Why today's tools miss it</h3>
-        <p>Observability tools grade the agent with another model as judge. That LLM judge catches silent failure at only <b>~0.65 AUROC</b>, barely better than a coin flip, because a confident wrong claim reads as success to a model too. Attest does not ask a model. It reads the <b>system of record</b> and compares, deterministically.</p>
+        <p>Observability tools grade the agent with another model as judge. That LLM judge catches silent failure at only <b>~0.65 AUROC</b>, barely better than a coin flip, because a confident wrong claim reads as success to a model too. Refundly does not ask a model. It reads <b>PayPal's own record</b> and compares, deterministically.</p>
       </div>
       <div class="why-cell">
         <h3><span class="d" style="background:var(--accent)"></span>Who it benefits</h3>
         <ul class="who-list">
-          <li><b>The night-shift support lead</b> who inherits a fleet she did not build and cannot read the code of. At 2am the board says every ticket closed green. She is the one a customer calls when it did not. Attest gives her the one thing she never had: a list of the runs that lied, before the complaints arrive.</li>
-          <li><b>The solo operator at a small lender or clinic</b> who bought agents from a vendor, has no ML team, and is personally accountable for every refund and record change.</li>
-          <li><b>Customers</b> who would otherwise be silently wronged: refunds lost, tickets closed unfixed.</li>
-          <li><b>Auditors and risk teams</b> who need evidence a claimed outcome actually happened, not a log saying an agent said so.</li>
+          <li><b>Rekha, and anyone like her</b> &mdash; double-charged, or trapped in a subscription built to be un-cancellable, who gives up because the process is exhausting. Refundly does the chore and proves the money actually moved.</li>
+          <li><b>The person managing a parent's money</b> from another city, who needs to know a refund or cancellation truly went through &mdash; not that an app said so.</li>
+          <li><b>Small sellers on PayPal</b> who must refund their own customers correctly and cannot afford an agent that says "done" when it isn't.</li>
+          <li><b>Anyone who would otherwise be silently wronged</b>: refunds lost, cancellations that never happened, charges that quietly came back.</li>
         </ul>
       </div>
     </div>
     <div class="why-foot">
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3l7 2.3v5c0 4.6-3 7.7-7 9.7-4-2-7-5.1-7-9.7v-5z" stroke="currentColor" stroke-width="1.6"/><path d="M8.5 12l2.6 2.6L15.8 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      <p><b>The vision:</b> agent fleets you can trust in production, because every claimed outcome is verified against reality, risky actions pause for a human, and the whole run is auditable evidence instead of faith in a self-report.</p>
+      <p><b>The vision:</b> AI you can trust with your money, because every claimed payment is verified against PayPal, risky actions pause for you, and the whole thing is auditable evidence instead of faith in a self-report.</p>
     </div>
     <div class="why-legend" aria-hidden="true">
       <span><i style="background:var(--ok)"></i>Verified true</span>
@@ -628,7 +668,7 @@ button, [role="tab"], .iconbtn{touch-action:manipulation; -webkit-tap-highlight-
       <p>The result below is a controlled demonstration on one small open model. Its
       controls are uninformative by construction, so it is reported here as a research
       direction and never as evidence about production agents. State verification against
-      the system of record remains the only ground truth Attest acts on.</p>
+      the system of record remains the only ground truth Refundly acts on.</p>
     </div>
     <div class="probe-card">
       <div class="probe-head">
@@ -647,7 +687,7 @@ button, [role="tab"], .iconbtn{touch-action:manipulation; -webkit-tap-highlight-
   </section>
 
   <footer class="foot">
-    <span class="mono">Attest Fleet · Gemini 3.7 + Gemma + ADK + Vertex AI + Cloud Run + Firestore</span>
+    <span class="mono">Refundly · OpenRouter + Google ADK + PayPal Agent Toolkit (sandbox)</span>
     <span class="spacer" style="flex:1"></span>
     <a href="/docs">API docs</a><a href="/metrics">/metrics</a><a href="/fleet/identities">/identities</a>
   </footer>
