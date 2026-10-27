@@ -124,21 +124,29 @@ The project's whole thesis is about not overstating outcomes, so this README pra
   `issue_refund` calls PayPal and the run is marked `completed` only if PayPal returns
   `COMPLETED`; otherwise it stays `pending_gateway` and the verifier flags it;
 - all model roles run on **OpenRouter** via LiteLLM — no Google Cloud project required;
-- the credential-free test suite, and the demo + static console.
+- the credential-free test suite, and the demo + static console;
+- **this path has been run live, end to end, on the PayPal sandbox** (Oct 2026): the OpenRouter
+  controller planned the ticket and resolved the customer by email, the billing agent called
+  `issue_refund`, and the verifier **independently re-read PayPal** and confirmed the refund
+  `COMPLETED` (sandbox refund `5S903169LT367394P`). Model → refund → ledger read-back is proven,
+  not just wired.
 
 **Simulated or not yet run live — stated plainly:**
 
 - the bundled demo (`ATTEST_DEMO=1`) and the static site are **fabricated sample data**, there
   so the interface is explorable with no backend;
 - the metric numbers in `evidence/` and in the console's example mode are **historical**, from
-  the earlier project's model sweep; a live OpenRouter + PayPal-sandbox sweep has **not been
-  run yet** and those numbers should not be read as Refundly's measured rate;
+  the earlier project's model sweep; a full **multi-run** OpenRouter + PayPal-sandbox sweep has
+  **not been run yet**, so those numbers are not Refundly's own measured rate (one live refund is
+  proven above — a rate needs many);
 - when PayPal keys are absent (or an order has no capture), the refund/cancel tools fall back
   to an **in-memory mock** so the app still runs for tests and the demo. The mock preserves a
   fault injector that can simulate a silent failure on demand.
-- a full live refund additionally needs the demo orders to carry **real sandbox captures** to
-  act on. These are now minted automatically at startup when PayPal keys are present (see below);
-  that path simply hasn't been exercised in this keyless environment.
+- a live refund needs the demo orders to carry **real sandbox captures** to act on. On a sandbox
+  business account with Advanced (direct-card) Checkout these are minted automatically at startup;
+  on accounts without it (e.g. some non-US merchants) startup seeding is skipped and a capture is
+  minted once via the sandbox **buyer-approval** flow instead (see below) — which is how the live
+  run above was done.
 
 ## Run it against real PayPal (OpenRouter + sandbox)
 
@@ -166,12 +174,14 @@ the evidence trail are all on the board. (The seed data contains two customers n
 Sharma"; the controller disambiguates on the email in the body — the ambiguity is deliberate.)
 
 **Making refunds act on real sandbox money.** A refund needs a real captured payment to act on.
-When `PAYPAL_CLIENT_ID`/`PAYPAL_SECRET` are set, the server **mints sandbox captures for the demo
-orders at startup** (`paypal.seed_sandbox`, wired into the app lifespan), so refunds act on real
-money with no extra step. This needs card payments (Advanced Checkout) enabled on the sandbox
-**business** account; if it isn't, seeding is skipped and logged, refunds fall back to the mock
-path, and you can seed the `paypal_capture_id` fields by hand from the PayPal sandbox dashboard
-instead. Disable auto-seeding with `ATTEST_PAYPAL_SEED=0`.
+When `PAYPAL_CLIENT_ID`/`PAYPAL_SECRET` are set, the server tries to **mint sandbox captures for the
+demo orders at startup** (`paypal.seed_sandbox`, wired into the app lifespan) by paying a test card.
+That needs Advanced (direct-card) Checkout on the sandbox **business** account, which isn't available
+on every account (e.g. some non-US merchants); when it's unavailable, startup seeding is skipped and
+logged and the tools fall back to the in-memory mock. On such an account, mint a capture once through
+the sandbox **buyer-approval** flow (create an order, approve it as a sandbox personal account,
+capture it), set that `paypal_capture_id` on the order, and run with `ATTEST_PAYPAL_SEED=0` — which
+is exactly how the verified live run above was done.
 
 Mutating calls (ticket trigger, kill switch, approvals) are open locally and gated by
 `ATTEST_OPERATOR_TOKEN` when it is set; the Google-stack extras from the earlier project

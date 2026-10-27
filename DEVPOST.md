@@ -97,15 +97,20 @@ The project is about not overstating outcomes, so the submission will not either
 **Real, implemented and committed:** the PayPal sandbox client, the refund/cancel tool wiring,
 and the verifier's independent read-back. With sandbox keys set, a refund is marked complete only
 if PayPal returns `COMPLETED`. Every model role runs on OpenRouter, and the credential-free test
-suite (59 tests, no network) covers the verifier, the policy gate and the metrics.
+suite (59 tests, no network) covers the verifier, the policy gate and the metrics. And this has now
+been **run live, end to end, on the PayPal sandbox**: the OpenRouter controller planned the ticket
+and resolved the right customer by email, the billing agent issued the refund, and the verifier
+independently re-read PayPal and confirmed it `COMPLETED` (sandbox refund `5S903169LT367394P`).
 
 **Simulated or not yet run live:** the bundled demo data and the static site are fabricated so the
 interface is explorable with no backend. The metric figures shown in the console's example mode
 and committed under `evidence/` are **historical**, from an earlier model sweep of the
-predecessor project, and are labelled as such — a live OpenRouter + PayPal-sandbox sweep has not
-been run yet, and those numbers are not Refundly's measured rate. With sandbox keys set, the demo
-orders now get real captures at startup, so a live refund runs end to end — that path simply
-hasn't been exercised yet in a keyless environment.
+predecessor project, and are labelled as such — a full **multi-run** OpenRouter + PayPal-sandbox
+sweep has not been run yet, so those numbers are not Refundly's own measured rate (one live refund
+is proven above; a rate needs many). Minting the demo orders' captures automatically at startup
+needs Advanced (direct-card) Checkout on the sandbox business account; where that isn't available,
+a capture is minted once via the sandbox buyer-approval flow instead — which is how the live run
+above was done.
 
 ## A significant update during the hackathon
 
@@ -168,11 +173,11 @@ don't hold up.
 
 ## What's next
 
-The sandbox-seeding step now runs at startup, so a live refund is one command once keys are in
-place; next is to run and publish a real OpenRouter + PayPal-sandbox sweep to replace the
-historical numbers with Refundly's own. After that: per-agent identity, so each worker acts under
-its own credential rather than the process's, and a process-conformance check alongside end-state
-verification, so a right outcome reached the wrong way is caught too.
+A single live agent-driven refund has now been run and verified against PayPal's sandbox ledger;
+next is to run and publish a full OpenRouter + PayPal-sandbox **sweep** to replace the historical
+numbers with Refundly's own measured rate. After that: per-agent identity, so each worker acts
+under its own credential rather than the process's, and a process-conformance check alongside
+end-state verification, so a right outcome reached the wrong way is caught too.
 
 ## Built with
 
