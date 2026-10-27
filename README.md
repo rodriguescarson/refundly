@@ -137,7 +137,8 @@ The project's whole thesis is about not overstating outcomes, so this README pra
   to an **in-memory mock** so the app still runs for tests and the demo. The mock preserves a
   fault injector that can simulate a silent failure on demand.
 - a full live refund additionally needs the demo orders to carry **real sandbox captures** to
-  act on — see the note below; that seeding step has not been run here.
+  act on. These are now minted automatically at startup when PayPal keys are present (see below);
+  that path simply hasn't been exercised in this keyless environment.
 
 ## Run it against real PayPal (OpenRouter + sandbox)
 
@@ -165,11 +166,12 @@ the evidence trail are all on the board. (The seed data contains two customers n
 Sharma"; the controller disambiguates on the email in the body — the ambiguity is deliberate.)
 
 **Making refunds act on real sandbox money.** A refund needs a real captured payment to act on.
-`paypal.seed_sandbox()` mints sandbox captures for the demo orders, but it requires card
-payments (Advanced Checkout) enabled on the sandbox **business** account; otherwise seed the
-`paypal_capture_id` fields by hand from the PayPal sandbox dashboard. Wiring that seeding into
-startup is the one remaining step before an end-to-end live refund; the client, tool and
-verifier paths are complete.
+When `PAYPAL_CLIENT_ID`/`PAYPAL_SECRET` are set, the server **mints sandbox captures for the demo
+orders at startup** (`paypal.seed_sandbox`, wired into the app lifespan), so refunds act on real
+money with no extra step. This needs card payments (Advanced Checkout) enabled on the sandbox
+**business** account; if it isn't, seeding is skipped and logged, refunds fall back to the mock
+path, and you can seed the `paypal_capture_id` fields by hand from the PayPal sandbox dashboard
+instead. Disable auto-seeding with `ATTEST_PAYPAL_SEED=0`.
 
 Mutating calls (ticket trigger, kill switch, approvals) are open locally and gated by
 `ATTEST_OPERATOR_TOKEN` when it is set; the Google-stack extras from the earlier project
@@ -251,7 +253,6 @@ cancel + read-back (`/v1/billing/subscriptions/{id}/cancel`, `/v1/billing/subscr
 
 ## Roadmap — stated rather than hidden
 
-- Wire `seed_sandbox` into startup (or a persistent store) for a one-command live refund.
 - Run and publish a live OpenRouter + PayPal-sandbox metric sweep to replace the historical numbers.
 - Per-agent identity (each worker under its own credential), and process-conformance checks in
   addition to end-state verification.

@@ -101,6 +101,9 @@ PAYPAL_SECRET = os.getenv("PAYPAL_SECRET", "")
 PAYPAL_ENV = os.getenv("PAYPAL_ENV", "sandbox")
 PAYPAL_BASE = "https://api-m.paypal.com" if PAYPAL_ENV == "live" else "https://api-m.sandbox.paypal.com"
 PAYPAL_READY = bool(PAYPAL_CLIENT_ID and PAYPAL_SECRET)
+# When keys are present, mint real sandbox captures for the demo orders at startup so refunds
+# act on real money. Set to 0 to run against PayPal without seeding (e.g. you seeded by hand).
+PAYPAL_SEED = os.getenv("ATTEST_PAYPAL_SEED", "1") == "1"
 
 # Policy: refunds above this amount need a human approval before the tool runs.
 REFUND_APPROVAL_THRESHOLD = float(os.getenv("ATTEST_REFUND_APPROVAL_THRESHOLD", "100"))

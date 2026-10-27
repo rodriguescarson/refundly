@@ -103,9 +103,9 @@ suite (59 tests, no network) covers the verifier, the policy gate and the metric
 interface is explorable with no backend. The metric figures shown in the console's example mode
 and committed under `evidence/` are **historical**, from an earlier model sweep of the
 predecessor project, and are labelled as such — a live OpenRouter + PayPal-sandbox sweep has not
-been run yet, and those numbers are not Refundly's measured rate. One honest gap remains before a
-full end-to-end live refund: the demo orders need real sandbox captures to act on, and wiring that
-seeding into startup is the next step. The client, tool and verifier paths themselves are done.
+been run yet, and those numbers are not Refundly's measured rate. With sandbox keys set, the demo
+orders now get real captures at startup, so a live refund runs end to end — that path simply
+hasn't been exercised yet in a keyless environment.
 
 ## A significant update during the hackathon
 
@@ -168,11 +168,11 @@ don't hold up.
 
 ## What's next
 
-Wire the sandbox-seeding step into startup so a live refund is one command, then run and publish a
-real OpenRouter + PayPal-sandbox sweep to replace the historical numbers with Refundly's own.
-After that: per-agent identity, so each worker acts under its own credential rather than the
-process's, and a process-conformance check alongside end-state verification, so a right outcome
-reached the wrong way is caught too.
+The sandbox-seeding step now runs at startup, so a live refund is one command once keys are in
+place; next is to run and publish a real OpenRouter + PayPal-sandbox sweep to replace the
+historical numbers with Refundly's own. After that: per-agent identity, so each worker acts under
+its own credential rather than the process's, and a process-conformance check alongside end-state
+verification, so a right outcome reached the wrong way is caught too.
 
 ## Built with
 

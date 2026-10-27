@@ -46,10 +46,26 @@ def _setup_tracing() -> None:
         print("tracing not enabled:", e)
 
 
+def _seed_paypal_captures() -> None:
+    """Give the demo orders real sandbox captures so refunds act on real money and the verifier
+    reads a real ledger. Best-effort: card captures need Advanced Checkout on the sandbox business
+    account, so a failure degrades to the mock path and is logged, never fatal."""
+    if not (config.PAYPAL_READY and config.PAYPAL_SEED):
+        return
+    try:
+        from . import paypal
+        seeded = paypal.seed_sandbox(get_store())
+        print(f"paypal: seeded {len(seeded)} sandbox capture(s)" if seeded
+              else "paypal: sandbox captures already present")
+    except Exception as e:  # noqa: BLE001 — seeding must never keep the service from starting
+        print("paypal sandbox seeding skipped:", e)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     _setup_tracing()
     seed(get_store())
+    _seed_paypal_captures()
     if os.getenv("ATTEST_DEMO") == "1":
         from .demo import seed_demo
         seed_demo(get_store())
