@@ -2,6 +2,15 @@
 
 **Tagline:** An AI agent that refunds your money through PayPal — and never says "done" until PayPal's own ledger agrees.
 
+**Try it**
+- **Demo video (2:55):** YouTube link on this page (also at
+  https://rodriguescarson.github.io/refundly/media/refundly-demo.mp4)
+- **Click around, no install:** https://rodriguescarson.github.io/refundly/app.html is the real
+  console, built from the 40-ticket sweep (read-only).
+- **Run the working app yourself:** https://github.com/rodriguescarson/refundly. Three commands
+  under *For judges* run the full console with no keys. Add sandbox PayPal and OpenRouter keys and
+  `scripts/live_agent_refund.py` reproduces the live agent refund end to end.
+
 ---
 
 ## Inspiration
