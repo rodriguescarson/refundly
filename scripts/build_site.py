@@ -1,4 +1,4 @@
-"""Build site/ — a static snapshot of the Attest Fleet console, deployable to any static host.
+"""Build site/ — a static snapshot of the Refundly console, deployable to any static host.
 
     python scripts/build_site.py                 # build site/ from data/api-snapshot/
     python scripts/build_site.py --fetch URL     # refresh data/api-snapshot/ from a running app first
@@ -17,9 +17,9 @@ SITE = ROOT / "site"
 HTML = ROOT / "src" / "attest_fleet" / "static" / "index.html"
 LAND = ROOT / "src" / "attest_fleet" / "static" / "landing.html"
 
-NOTICE = ("This is a static snapshot of the final run, taken 25 Oct 2026. The fleet service on "
-          "Cloud Run is retired, so the kill switch, approvals and ticket trigger no longer act; "
-          "the runs, verdicts and evidence are the real ones.")
+NOTICE = ("Static snapshot of a Refundly evaluation sweep (OpenRouter models + fault injection). "
+          "It is read-only: the kill switch, approvals and ticket trigger show this notice instead "
+          "of acting. The runs, verdicts and evidence are the real ones from that sweep.")
 
 
 def fetch(base: str) -> None:
@@ -81,7 +81,7 @@ def build() -> None:
         ('fetch("/briefing")', 'fetch("/api/briefing.json")'),
         ('<a href="/metrics">/metrics</a><a href="/fleet/identities">/identities</a>',
          '<a href="/api/metrics.json">/metrics</a><a href="/api/fleet/identities.json">/identities</a>'),
-        ('<body>', '<body>\n<div class="snapshot-note" role="note">' + NOTICE + ' <a href="https://github.com/rodriguescarson/attest-fleet">Run it yourself from the repo.</a></div>'),
+        ('<body>', '<body>\n<div class="snapshot-note" role="note">' + NOTICE + ' <a href="https://github.com/rodriguescarson/refundly">Run it yourself from the repo.</a></div>'),
         ('}catch(e){toast("Action failed")}', '}catch(e){toast(RETIRED)}'),
         ('setTimeout(loadMetrics,1500);}catch(e){toast("Failed")}}', 'setTimeout(loadMetrics,1500);}catch(e){toast(RETIRED)}}'),
         ('toast("Rejected"); loadApprovals();}catch(e){toast("Failed")}}', 'toast("Rejected"); loadApprovals();}catch(e){toast(RETIRED)}}'),
@@ -107,7 +107,8 @@ def build() -> None:
         shutil.copy(SNAP / name, SITE / "api" / name)
     for p in (SNAP / "runs").glob("*.json"):
         shutil.copy(p, SITE / "api" / "runs" / p.name)
-    shutil.copy(SNAP / "briefing.wav", SITE / "briefing.wav")
+    if (SNAP / "briefing.wav").exists():  # spoken briefing needs a TTS backend; optional on OpenRouter
+        shutil.copy(SNAP / "briefing.wav", SITE / "briefing.wav")
     shutil.copy(SNAP / "openapi.json", SITE / "openapi.json")
     shutil.copy(SNAP / "docs.html", SITE / "docs" / "index.html")
     # Every read path the page can ask for must exist as a file.

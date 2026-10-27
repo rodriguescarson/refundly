@@ -526,7 +526,7 @@ h1,h2,h3,.sec-h,.why-lead{ font-family:var(--disp); letter-spacing:-.02em; }
 </style>
 </head>
 <body>
-<div class="snapshot-note" role="note">This is a static snapshot of the final run, taken 25 Oct 2026. The fleet service on Cloud Run is retired, so the kill switch, approvals and ticket trigger no longer act; the runs, verdicts and evidence are the real ones. <a href="https://github.com/rodriguescarson/attest-fleet">Run it yourself from the repo.</a></div>
+<div class="snapshot-note" role="note">Static snapshot of a Refundly evaluation sweep (OpenRouter models + fault injection). It is read-only: the kill switch, approvals and ticket trigger show this notice instead of acting. The runs, verdicts and evidence are the real ones from that sweep. <a href="https://github.com/rodriguescarson/refundly">Run it yourself from the repo.</a></div>
 <!-- Attest Fleet operator console. Leads with the reported-vs-verified gap, not an all-green dashboard. -->
 <div class="shell">
   <header class="topbar">
@@ -683,7 +683,7 @@ h1,h2,h3,.sec-h,.why-lead{ font-family:var(--disp); letter-spacing:-.02em; }
     <div class="probe-card">
       <div class="probe-head">
         <h3 class="probe-title">Interpretability probe: the representation&ndash;action gap</h3>
-        <a class="probe-link" href="https://github.com/rodriguescarson/attest-fleet/blob/main/probe/RESULTS.md" target="_blank" rel="noopener">method + reproduction &rarr;</a>
+        <a class="probe-link" href="https://github.com/rodriguescarson/refundly/blob/main/probe/RESULTS.md" target="_blank" rel="noopener">method + reproduction &rarr;</a>
       </div>
       <p class="probe-lead">On a task built so that surface text and stated confidence carry <b>no signal by construction</b>, the label is still linearly recoverable from the model's <b>internal activations</b>. The information is present internally even when it is absent from the output. A controlled demonstration on one small open model &mdash; not a measurement of production agents, whose calibration is the 40-ticket sweep above.</p>
       <div class="probe-bars">
@@ -724,7 +724,7 @@ const OP_TOKEN=(window.__ATTEST_TOKEN__||"");
 
 /* Static snapshot: reads come from JSON files captured from the live service; writes are retired. */
 const SNAP={}; const snap=p=>{ if(!SNAP[p]) SNAP[p]=fetch(p).then(r=>r.ok?r.json():Promise.reject(r)); return SNAP[p]; };
-const RETIRED="This is a static snapshot of the final run, taken 25 Oct 2026. The fleet service on Cloud Run is retired, so the kill switch, approvals and ticket trigger no longer act; the runs, verdicts and evidence are the real ones.";
+const RETIRED="Static snapshot of a Refundly evaluation sweep (OpenRouter models + fault injection). It is read-only: the kill switch, approvals and ticket trigger show this notice instead of acting. The runs, verdicts and evidence are the real ones from that sweep.";
 const api=async(p,o)=>{
   o=o||{}; if((o.method||"GET").toUpperCase()!=="GET"){ toast(RETIRED); throw new Error("retired"); }
   const [pt,qs]=p.split("?"); const q=new URLSearchParams(qs||"");

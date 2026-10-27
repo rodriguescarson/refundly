@@ -1,1 +1,1 @@
-{"ok":true,"store":"firestore","kill_switch":false,"auth":"enforced","fault_rate":0.0,"models":{"controller":"gemini-3.7-flash","worker":"gemini-3.7-flash"}}
+{"ok":true,"store":"memory","kill_switch":false,"auth":"open (local dev)","fault_rate":0.0,"models":{"controller":"openrouter/google/gemini-2.5-flash","worker":"openrouter/google/gemini-2.5-flash"}}
