@@ -132,9 +132,11 @@ The project's whole thesis is about not overstating outcomes, so this README pra
   not just wired;
 - the **measured numbers are Refundly's own**: a 40-ticket evaluation sweep on the OpenRouter
   models ([`scripts/simulate.py`](scripts/simulate.py), fault-rate 0.3) reports a **15.8%
-  silent-failure rate** — reported success 50.0% vs verified 44.7%, every false "done" caught by
-  the verifier ([`evidence/summary.json`](evidence/summary.json)). The static console under `site/`
-  is built from this sweep.
+  silent-failure rate** — reported success 50.0% vs verified 44.7%; the verifier caught 3 confident
+  false "done"s, and one more slipped past it (the genuinely ambiguous two-customers-one-name
+  ticket), which is counted as a verifier blind spot rather than hidden
+  ([`evidence/summary.json`](evidence/summary.json)). The static console under `site/` is built
+  from this sweep.
 
 **Simulated or not yet run live — stated plainly:**
 

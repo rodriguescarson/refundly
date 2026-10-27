@@ -102,8 +102,10 @@ been **run live, end to end, on the PayPal sandbox**: the OpenRouter controller 
 and resolved the right customer by email, the billing agent issued the refund, and the verifier
 independently re-read PayPal and confirmed it `COMPLETED` (sandbox refund `5S903169LT367394P`). And
 the published numbers are Refundly's own: a 40-ticket OpenRouter evaluation sweep (fault-rate 0.3)
-measures a **15.8% silent-failure rate** — reported success 50.0% vs verified 44.7%, every false
-"done" caught by the verifier — and the static demo console is built from that sweep.
+measures a **15.8% silent-failure rate** — reported success 50.0% vs verified 44.7%. The verifier
+caught 3 confident false "done"s; one more slipped past it (the genuinely ambiguous ticket where two
+customers share a name) and is counted as a verifier blind spot rather than hidden. The static demo
+console is built from that sweep.
 
 **Simulated or not yet run live:** the bundled `ATTEST_DEMO` data is fabricated so the interface is
 explorable with no backend (the static demo console is **not** — it is the real sweep above). The

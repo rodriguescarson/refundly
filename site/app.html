@@ -697,9 +697,9 @@ h1,h2,h3,.sec-h,.why-lead{ font-family:var(--disp); letter-spacing:-.02em; }
   </section>
 
   <footer class="foot">
-    <span class="mono">Refundly · OpenRouter + Google ADK + PayPal Agent Toolkit (sandbox)</span>
+    <span class="mono">Refundly · OpenRouter + Google ADK + PayPal REST (sandbox)</span>
     <span class="spacer" style="flex:1"></span>
-    <a href="/docs">API docs</a><a href="/api/metrics.json">/metrics</a><a href="/api/fleet/identities.json">/identities</a>
+    <a href="docs/">API docs</a><a href="api/metrics.json">/metrics</a><a href="api/fleet/identities.json">/identities</a>
   </footer>
 </div>
 
@@ -729,7 +729,7 @@ const api=async(p,o)=>{
   o=o||{}; if((o.method||"GET").toUpperCase()!=="GET"){ toast(RETIRED); throw new Error("retired"); }
   const [pt,qs]=p.split("?"); const q=new URLSearchParams(qs||"");
   if(pt==="/runs"){
-    const all=await snap("/api/runs.json"); let items=all.items.slice();
+    const all=await snap("api/runs.json"); let items=all.items.slice();
     const st=q.get("status"), qq=(q.get("q")||"").toLowerCase(), sort=q.get("sort")||"started", order=q.get("order")||"desc";
     if(st) items=items.filter(r=>r.status===st);
     if(qq) items=items.filter(r=>((r.id||"")+((r.ticket||{}).subject||"")+((r.ticket||{}).customer_ref||"")).toLowerCase().includes(qq));
@@ -738,10 +738,10 @@ const api=async(p,o)=>{
     const total=items.length, limit=Math.max(1,Math.min(+q.get("limit")||20,100)), offset=+q.get("offset")||0;
     return {items:items.slice(offset,offset+limit),total,limit,offset,counts:all.counts};
   }
-  if(pt==="/runs/interrupted") return snap("/api/runs__interrupted.json");
-  if(pt.startsWith("/runs/")) return snap("/api/runs/"+encodeURIComponent(pt.slice(6))+".json");
-  if(pt==="/approvals"){ const a=await snap("/api/approvals.json"); const st=q.get("status"); return st?a.filter(x=>x.status===st):a; }
-  return snap("/api"+pt+".json");
+  if(pt==="/runs/interrupted") return snap("api/runs__interrupted.json");
+  if(pt.startsWith("/runs/")) return snap("api/runs/"+encodeURIComponent(pt.slice(6))+".json");
+  if(pt==="/approvals"){ const a=await snap("api/approvals.json"); const st=q.get("status"); return st?a.filter(x=>x.status===st):a; }
+  return snap("api"+pt+".json");
 };
 
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -1096,7 +1096,7 @@ async function tick(){ await loadMetrics(); if(state.tab==="overview")loadOvervi
     if(audio && !audio.paused){ audio.pause(); audio.currentTime=0; label.textContent="Brief me"; return; }
     btn.setAttribute("aria-busy","true");
     try{
-      const t=await fetch("/api/briefing.json").then(r=>r.json());
+      const t=await fetch("api/briefing.json").then(r=>r.json());
       out.textContent=t.script; out.style.display="block";
       audio=new Audio("/briefing.wav?t="+Date.now());
       audio.onended=()=>{ label.textContent="Brief me"; };

@@ -6,7 +6,8 @@
 The console's read paths are served from JSON files captured from the live service; search,
 status filter, sort and paging over runs are done in the page, mirroring GET /runs. The
 server-sent board stream and every mutating call (kill switch, approvals, ticket trigger) are
-retired: pressing them shows a notice instead of failing.
+retired: pressing them shows a notice instead of failing. Every URL the page fetches is
+relative, so the site works at a domain root or under a sub-path (GitHub Pages: /refundly/).
 """
 import json, shutil, sys, urllib.request
 from pathlib import Path
@@ -55,7 +56,7 @@ const api=async(p,o)=>{
   o=o||{}; if((o.method||"GET").toUpperCase()!=="GET"){ toast(RETIRED); throw new Error("retired"); }
   const [pt,qs]=p.split("?"); const q=new URLSearchParams(qs||"");
   if(pt==="/runs"){
-    const all=await snap("/api/runs.json"); let items=all.items.slice();
+    const all=await snap("api/runs.json"); let items=all.items.slice();
     const st=q.get("status"), qq=(q.get("q")||"").toLowerCase(), sort=q.get("sort")||"started", order=q.get("order")||"desc";
     if(st) items=items.filter(r=>r.status===st);
     if(qq) items=items.filter(r=>((r.id||"")+((r.ticket||{}).subject||"")+((r.ticket||{}).customer_ref||"")).toLowerCase().includes(qq));
@@ -64,10 +65,10 @@ const api=async(p,o)=>{
     const total=items.length, limit=Math.max(1,Math.min(+q.get("limit")||20,100)), offset=+q.get("offset")||0;
     return {items:items.slice(offset,offset+limit),total,limit,offset,counts:all.counts};
   }
-  if(pt==="/runs/interrupted") return snap("/api/runs__interrupted.json");
-  if(pt.startsWith("/runs/")) return snap("/api/runs/"+encodeURIComponent(pt.slice(6))+".json");
-  if(pt==="/approvals"){ const a=await snap("/api/approvals.json"); const st=q.get("status"); return st?a.filter(x=>x.status===st):a; }
-  return snap("/api"+pt+".json");
+  if(pt==="/runs/interrupted") return snap("api/runs__interrupted.json");
+  if(pt.startsWith("/runs/")) return snap("api/runs/"+encodeURIComponent(pt.slice(6))+".json");
+  if(pt==="/approvals"){ const a=await snap("api/approvals.json"); const st=q.get("status"); return st?a.filter(x=>x.status===st):a; }
+  return snap("api"+pt+".json");
 };
 '''
 
@@ -78,9 +79,10 @@ def build() -> None:
     end = h.index("\n", start)
     h = h[:start] + API % json.dumps(NOTICE) + h[end:]
     for a, b in [
-        ('fetch("/briefing")', 'fetch("/api/briefing.json")'),
+        ('fetch("/briefing")', 'fetch("api/briefing.json")'),
         ('<a href="/metrics">/metrics</a><a href="/fleet/identities">/identities</a>',
-         '<a href="/api/metrics.json">/metrics</a><a href="/api/fleet/identities.json">/identities</a>'),
+         '<a href="api/metrics.json">/metrics</a><a href="api/fleet/identities.json">/identities</a>'),
+        ('<a href="/docs">API docs</a>', '<a href="docs/">API docs</a>'),
         ('<body>', '<body>\n<div class="snapshot-note" role="note">' + NOTICE + ' <a href="https://github.com/rodriguescarson/refundly">Run it yourself from the repo.</a></div>'),
         ('}catch(e){toast("Action failed")}', '}catch(e){toast(RETIRED)}'),
         ('setTimeout(loadMetrics,1500);}catch(e){toast("Failed")}}', 'setTimeout(loadMetrics,1500);}catch(e){toast(RETIRED)}}'),
@@ -95,8 +97,11 @@ def build() -> None:
     e = h.index("\n", e) + 1
     h = h[:s] + '  { const d=$("#liveDot"); if(d) d.title="snapshot of the final run"; }\n' + h[e:]
 
+    # Empty site/ rather than delete it: on Windows a preview server or a sync client holding the
+    # folder open makes removing the folder itself fail.
     if SITE.exists():
-        shutil.rmtree(SITE)
+        for c in SITE.iterdir():
+            shutil.rmtree(c) if c.is_dir() else c.unlink()
     (SITE / "api" / "runs").mkdir(parents=True)
     (SITE / "api" / "fleet").mkdir(parents=True)
     (SITE / "docs").mkdir(parents=True)
@@ -110,7 +115,9 @@ def build() -> None:
     if (SNAP / "briefing.wav").exists():  # spoken briefing needs a TTS backend; optional on OpenRouter
         shutil.copy(SNAP / "briefing.wav", SITE / "briefing.wav")
     shutil.copy(SNAP / "openapi.json", SITE / "openapi.json")
-    shutil.copy(SNAP / "docs.html", SITE / "docs" / "index.html")
+    # Relative, so the docs work under a sub-path (GitHub Pages serves this at /refundly/).
+    (SITE / "docs" / "index.html").write_text(
+        (SNAP / "docs.html").read_text().replace("url: '/openapi.json'", "url: '../openapi.json'"))
     # Every read path the page can ask for must exist as a file.
     runs = json.loads((SNAP / "runs.json").read_text())
     missing = [f"api/runs/{r['id']}.json" for r in runs["items"] if not (SITE / "api" / "runs" / f"{r['id']}.json").exists()]
