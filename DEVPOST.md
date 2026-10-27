@@ -77,6 +77,21 @@ PayPal's own Agent Toolkit already lets an agent *issue* a refund; what nothing 
 does is turn around afterward and prove, against the ledger, that the refund really moved. That
 proof is Refundly's original contribution.
 
+## AI tools, and what each one does
+
+- **OpenRouter → Google Gemini 2.5 Flash**, through LiteLLM inside Google's Agent Development
+  Kit: the **controller** (reads the request, resolves which customer it is, plans typed tasks,
+  read-only tools) and the **billing** and **account** workers, which call the PayPal tools.
+- **OpenRouter → Anthropic Claude Haiku 4.5**: the **auditor**, used only for tasks that have no
+  deterministic post-condition. It is a different model family from the workers on purpose, so
+  the second opinion is independent.
+- **OpenRouter vision (Gemini 2.5 Flash)**: reads an attached screenshot or receipt into text
+  before the controller plans.
+- **No model decides the money verdict.** A refund or cancellation is marked verified only by a
+  deterministic read of PayPal's own ledger.
+- **For the demo video only:** OpenRouter `openai/gpt-audio` for the narration and
+  `google/lyria-3-pro-preview` for the music.
+
 ## Design
 
 A board whose entire argument is "a green light is not evidence" should not itself be a wall of
@@ -190,8 +205,8 @@ A single live agent-driven refund has been verified against PayPal's sandbox led
 40-ticket OpenRouter sweep now gives Refundly its own measured silent-failure rate (15.8%); next is
 to extend that sweep so every ticket runs against a live sandbox capture end to end, not just the
 fault injector. After that: per-agent identity, so each worker acts under its own credential rather
-than the process's, and a process-conformance check alongside
-end-state verification, so a right outcome reached the wrong way is caught too.
+than the process's, and letting the process-conformance checks (already reported beside every
+verdict) fail a run outright, so a right outcome reached the wrong way is caught, not just noted.
 
 ## Built with
 
