@@ -8,7 +8,7 @@ billing_agent calls issue_refund (which refunds the real PayPal capture) -> the 
 INDEPENDENTLY re-reads PayPal's ledger. No agent declares its own success; run.status is
 derived from what the verifier found. Prints no secrets.
 
-Needs PAYPAL_CLIENT_ID / PAYPAL_CLIENT_SECRET (sandbox) and OPENROUTER_API_KEY in .env, and an
+Needs PAYPAL_CLIENT_ID / PAYPAL_SECRET (sandbox) and OPENROUTER_API_KEY in .env, and an
 unrefunded sandbox capture. Where the sandbox business account lacks direct-card checkout, mint
 one through the buyer-approval flow (create an order, approve it as the sandbox buyer, capture).
 """
