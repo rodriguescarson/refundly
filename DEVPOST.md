@@ -15,6 +15,8 @@
 
 ## Inspiration
 
+*Rekha is an illustrative composite, not a real customer.*
+
 Rekha, 58, was double-charged by a gym app she couldn't find the cancel button for. She called,
 sat through twenty minutes of hold music, and gave up. Most people give up. The money is small
 enough to walk away from and the process is exhausting enough that walking away is the rational

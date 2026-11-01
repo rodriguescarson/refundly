@@ -28,7 +28,7 @@ It was made with the brag-slim method. The workspace is `brag-output/` (gitignor
 ## Optional extras (none required)
 
 - [ ] A custom YouTube thumbnail: upload `brag-output/brag.jpg` in YouTube Studio.
-- [ ] If "Rekha, 58" isn't a real person, label her as a composite in the Devpost story, `DEVPOST.md` and the video description.
+- [ ] Label Rekha as an illustrative composite in the Devpost story and the YouTube description (`DEVPOST.md` is done).
 - [ ] Any edit before the deadline goes through **Edit** on the Devpost submission.
 
 ## Gotchas
