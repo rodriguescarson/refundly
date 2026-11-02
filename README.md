@@ -57,6 +57,8 @@ the policy gate and the metrics arithmetic with no model and no network in the l
 
 ## The problem
 
+*Rekha is an illustrative composite, not a real customer.*
+
 Rekha, 58, was double-charged by a gym app she couldn't find the cancel button for. After
 twenty minutes of hold music she gave up — like most people do. Millions of dollars a year
 are lost this way: duplicate charges nobody chases, refunds that silently never land,
