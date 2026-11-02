@@ -28,7 +28,7 @@ It was made with the brag-slim method. The workspace is `brag-output/` (gitignor
 ## Optional extras (none required)
 
 - [ ] A custom YouTube thumbnail: upload `brag-output/brag.jpg` in YouTube Studio.
-- [ ] Label Rekha as an illustrative composite in the YouTube description (the Devpost story, `DEVPOST.md`, `README.md` and the console are done).
+- [x] Rekha is labelled as an illustrative composite in the Devpost story, `DEVPOST.md`, `README.md`, the console and the YouTube description. The video narration is unlabelled, because changing it means re-rendering and re-uploading.
 - [ ] Any edit before the deadline goes through **Edit** on the Devpost submission.
 
 ## Gotchas
